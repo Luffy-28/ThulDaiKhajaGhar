@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "name": "Butter Chicken",
+    "category": "Main Course",
+    "price": 18,
+    "image": "/menu/butterchicken.jpg",
+    "quantity": 2
+  },
+  {
+    "id": 2,
+    "name": "Samosa",
+    "category": "Snacks",
+    "price": 5,
+    "image": "/menu/samosa.jpg",
+    "quantity": 3
+  }
+]

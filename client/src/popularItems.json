@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Butter Chicken",
+    "image": "/menu/butterchicken.jpg",
+    "price": 18
+  },
+  {
+    "name": "Samosa",
+    "image": "/menu/samosa.jpg",
+    "price": 5
+  },
+  {
+    "name": "Paneer Tikka",
+    "image": "/menu/paneertikka.jpg",
+    "price": 10
+  }
+]

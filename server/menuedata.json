@@ -1,0 +1,322 @@
+[
+  {
+    "id": "1",
+    "name": "Steamed chicken momo",
+    "price": 18.99,
+    "description": "Tender steamed dumplings crafted with a savory filling of spiced ground chicken, wrapped in a thin flour dough, and served with a zesty tomato-chili dipping sauce that enhances its rich flavor.",
+    "ingredients": ["Ground chicken", "Flour", "Onion", "Garlic", "Ginger", "Spices", "Tomato", "Chili"],
+    "nutrition": {"calories": 250, "fat": 10, "protein": 15},
+    "category": "Dumplings",
+    "image": "https://example.com/steamed-chicken-momo.jpg"
+  },
+  {
+    "id": "2",
+    "name": "Steamed Vegetable momo",
+    "price": 17.99,
+    "description": "Delicate steamed dumplings filled with a vibrant mix of finely chopped vegetables like cabbage, carrots, and spinach, encased in a soft flour dough, paired with a tangy tomato-chili sauce.",
+    "ingredients": ["Cabbage", "Carrot", "Spinach", "Flour", "Onion", "Garlic", "Spices", "Tomato", "Chili"],
+    "nutrition": {"calories": 200, "fat": 5, "protein": 6},
+    "category": "Dumplings",
+    "image": "https://example.com/steamed-vegetable-momo.jpg"
+  },
+  {
+    "id": "3",
+    "name": "Fried chicken momo",
+    "price": 18.99,
+    "description": "Crispy fried dumplings packed with a flavorful filling of spiced ground chicken, wrapped in a golden flour dough, and served with a spicy tomato-chili sauce for a delightful crunch.",
+    "ingredients": ["Ground chicken", "Flour", "Onion", "Garlic", "Ginger", "Spices", "Tomato", "Chili", "Oil"],
+    "nutrition": {"calories": 300, "fat": 15, "protein": 16},
+    "category": "Dumplings",
+    "image": "https://example.com/fried-chicken-momo.jpg"
+  },
+  {
+    "id": "4",
+    "name": "Fried vegetables momo",
+    "price": 17.99,
+    "description": "Crispy fried dumplings stuffed with a medley of seasoned vegetables including cabbage, carrots, and peas, encased in a crunchy flour dough, served with a tangy tomato-chili sauce.",
+    "ingredients": ["Cabbage", "Carrot", "Peas", "Flour", "Onion", "Garlic", "Spices", "Tomato", "Chili", "Oil"],
+    "nutrition": {"calories": 250, "fat": 10, "protein": 7},
+    "category": "Dumplings",
+    "image": "https://example.com/fried-vegetables-momo.jpg"
+  },
+  {
+    "id": "5",
+    "name": "Chicken jhol momo",
+    "price": 19.99,
+    "description": "Steamed dumplings immersed in a warm, spicy chicken broth infused with ginger, garlic, and Nepali spices, offering a comforting and flavorful soup-dumpling experience.",
+    "ingredients": ["Ground chicken", "Flour", "Onion", "Garlic", "Ginger", "Spices", "Chicken broth"],
+    "nutrition": {"calories": 280, "fat": 12, "protein": 18},
+    "category": "Dumplings",
+    "image": "https://example.com/chicken-jhol-momo.jpg"
+  },
+  {
+    "id": "6",
+    "name": "Vegetable jhol momo",
+    "price": 18.99,
+    "description": "Steamed dumplings served in a savory vegetable broth spiced with ginger, garlic, and traditional Nepali herbs, creating a hearty and aromatic soup-dumpling dish.",
+    "ingredients": ["Cabbage", "Carrot", "Flour", "Onion", "Garlic", "Ginger", "Spices", "Vegetable broth"],
+    "nutrition": {"calories": 230, "fat": 6, "protein": 8},
+    "category": "Dumplings",
+    "image": "https://example.com/vegetable-jhol-momo.jpg"
+  },
+  {
+    "id": "7",
+    "name": "C momo",
+    "price": 19.99,
+    "description": "Steamed or fried dumplings coated with a bold chili sauce, offering a fiery kick and a unique twist on traditional momos, served with a side of tangy sauce.",
+    "ingredients": ["Ground chicken or vegetables", "Flour", "Chili sauce", "Garlic", "Ginger", "Spices"],
+    "nutrition": {"calories": 290, "fat": 12, "protein": 15},
+    "category": "Dumplings",
+    "image": "https://example.com/c-momo.jpg"
+  },
+  {
+    "id": "8",
+    "name": "Chatpate",
+    "price": 10.99,
+    "description": "A spicy street food blend of puffed rice, diced potatoes, chickpeas, and tomatoes, tossed with tamarind sauce and Nepali spices for a tangy, crunchy bite.",
+    "ingredients": ["Puffed rice", "Potato", "Chickpeas", "Tomato", "Tamarind", "Spices", "Onion"],
+    "nutrition": {"calories": 180, "fat": 5, "protein": 5},
+    "category": "Street Food",
+    "image": "https://example.com/chatpate.jpg"
+  },
+  {
+    "id": "9",
+    "name": "Pani puri",
+    "price": 10.99,
+    "description": "Crispy hollow puris filled with spiced water, mashed potatoes, and chickpeas, offering a burst of tangy and spicy flavors in every bite.",
+    "ingredients": ["Flour", "Potato", "Chickpeas", "Spiced water", "Tamarind", "Spices"],
+    "nutrition": {"calories": 150, "fat": 3, "protein": 4},
+    "category": "Street Food",
+    "image": "https://example.com/pani-puri.jpg"
+  },
+  {
+    "id": "10",
+    "name": "Vegetable platter",
+    "price": 26.99,
+    "description": "A generous assortment of vegetarian appetizers including samosas, momos, and vegetable pakoras, served with dipping sauces for a diverse taste experience.",
+    "ingredients": ["Vegetables", "Flour", "Spices", "Oil", "Samosa filling", "Momo filling"],
+    "nutrition": {"calories": 400, "fat": 20, "protein": 10},
+    "category": "Platter",
+    "image": "https://example.com/vegetable-platter.jpg"
+  },
+  {
+    "id": "11",
+    "name": "Special mutton sekuwa set",
+    "price": 23.99,
+    "description": "Grilled mutton skewers marinated with Nepali spices, served with a side of achar and rice for a smoky and savory meal.",
+    "ingredients": ["Mutton", "Spices", "Garlic", "Ginger", "Oil", "Rice", "Achar"],
+    "nutrition": {"calories": 450, "fat": 25, "protein": 30},
+    "category": "Grilled",
+    "image": "https://example.com/special-mutton-sekuwa-set.jpg"
+  },
+  {
+    "id": "12",
+    "name": "Chicken sausage",
+    "price": 10.99,
+    "description": "Juicy chicken sausages grilled to perfection, seasoned with herbs and spices, served with a side of dipping sauce.",
+    "ingredients": ["Chicken", "Spices", "Herbs", "Oil"],
+    "nutrition": {"calories": 200, "fat": 12, "protein": 15},
+    "category": "Grilled",
+    "image": "https://example.com/chicken-sausage.jpg"
+  },
+  {
+    "id": "13",
+    "name": "Non veg platter",
+    "price": 28.99,
+    "description": "A hearty selection of non-vegetarian appetizers including sekuwa, chicken momos, and sausages, served with assorted sauces.",
+    "ingredients": ["Chicken", "Mutton", "Flour", "Spices", "Oil", "Sauces"],
+    "nutrition": {"calories": 500, "fat": 30, "protein": 35},
+    "category": "Platter",
+    "image": "https://example.com/non-veg-platter.jpg"
+  },
+  {
+    "id": "14",
+    "name": "Hakula set",
+    "price": 23.99,
+    "description": "A traditional Nepali meal featuring rice, lentil curry, and assorted vegetable sides, cooked with authentic spices for a wholesome dish.",
+    "ingredients": ["Rice", "Lentils", "Vegetables", "Spices", "Oil"],
+    "nutrition": {"calories": 350, "fat": 10, "protein": 12},
+    "category": "Main Course",
+    "image": "https://example.com/hakula-set.jpg"
+  },
+  {
+    "id": "15",
+    "name": "Batmas sadeko",
+    "price": 10.99,
+    "description": "A refreshing soybean salad seasoned with Nepali spices, onions, and tomatoes, offering a crunchy and tangy side dish.",
+    "ingredients": ["Soybeans", "Onion", "Tomato", "Spices", "Lemon"],
+    "nutrition": {"calories": 150, "fat": 5, "protein": 8},
+    "category": "Side Dish",
+    "image": "https://example.com/batmas-sadeko.jpg"
+  },
+  {
+    "id": "16",
+    "name": "Veg samosa",
+    "price": 10.99,
+    "description": "Crispy triangular pastries filled with a spiced mix of peas, potatoes, and carrots, deep-fried to golden perfection.",
+    "ingredients": ["Flour", "Peas", "Potato", "Carrot", "Spices", "Oil"],
+    "nutrition": {"calories": 200, "fat": 10, "protein": 4},
+    "category": "Snacks",
+    "image": "https://example.com/veg-samosa.jpg"
+  },
+  {
+    "id": "17",
+    "name": "Veg chow mein",
+    "price": 17.99,
+    "description": "Stir-fried noodles tossed with a colorful blend of fresh vegetables like cabbage, bell peppers, and carrots, seasoned with soy sauce and spices.",
+    "ingredients": ["Noodles", "Cabbage", "Bell pepper", "Carrot", "Soy sauce", "Spices", "Oil"],
+    "nutrition": {"calories": 300, "fat": 8, "protein": 6},
+    "category": "Noodles",
+    "image": "https://example.com/veg-chow-mein.jpg"
+  },
+  {
+    "id": "18",
+    "name": "Chicken chow mein",
+    "price": 18.99,
+    "description": "Stir-fried noodles combined with tender chicken strips, mixed vegetables, and a savory blend of soy sauce and Nepali spices.",
+    "ingredients": ["Noodles", "Chicken", "Cabbage", "Bell pepper", "Soy sauce", "Spices", "Oil"],
+    "nutrition": {"calories": 350, "fat": 12, "protein": 20},
+    "category": "Noodles",
+    "image": "https://example.com/chicken-chow-mein.jpg"
+  },
+  {
+    "id": "19",
+    "name": "Redbull",
+    "price": 5.00,
+    "description": "A carbonated energy drink packed with caffeine and taurine for a quick boost.",
+    "ingredients": ["Carbonated water", "Sugar", "Caffeine", "Taurine", "Vitamins"],
+    "nutrition": {"calories": 110, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/redbull.jpg"
+  },
+  {
+    "id": "20",
+    "name": "Water",
+    "price": 3.00,
+    "description": "Pure bottled still water for hydration.",
+    "ingredients": ["Water"],
+    "nutrition": {"calories": 0, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/water.jpg"
+  },
+  {
+    "id": "21",
+    "name": "Coke",
+    "price": 4.50,
+    "description": "Classic carbonated cola with a sweet and refreshing taste.",
+    "ingredients": ["Carbonated water", "Sugar", "Caffeine", "Flavorings"],
+    "nutrition": {"calories": 140, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/coke.jpg"
+  },
+  {
+    "id": "22",
+    "name": "Fanta",
+    "price": 4.50,
+    "description": "Orange-flavored carbonated drink with a citrusy zing.",
+    "ingredients": ["Carbonated water", "Sugar", "Orange flavor", "Citric acid"],
+    "nutrition": {"calories": 140, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/fanta.jpg"
+  },
+  {
+    "id": "23",
+    "name": "Sprite",
+    "price": 4.50,
+    "description": "Lemon-lime flavored carbonated drink with a crisp taste.",
+    "ingredients": ["Carbonated water", "Sugar", "Lemon-lime flavor", "Citric acid"],
+    "nutrition": {"calories": 140, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/sprite.jpg"
+  },
+  {
+    "id": "24",
+    "name": "I need no sugar",
+    "price": 4.50,
+    "description": "Sugar-free carbonated drink with a light, refreshing taste.",
+    "ingredients": ["Carbonated water", "Artificial sweeteners", "Flavorings"],
+    "nutrition": {"calories": 0, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/i-need-no-sugar.jpg"
+  },
+  {
+    "id": "25",
+    "name": "No sugar",
+    "price": 4.50,
+    "description": "Sugar-free carbonated drink with a crisp flavor.",
+    "ingredients": ["Carbonated water", "Artificial sweeteners", "Flavorings"],
+    "nutrition": {"calories": 0, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/no-sugar.jpg"
+  },
+  {
+    "id": "26",
+    "name": "Mountain dew",
+    "price": 4.50,
+    "description": "Citrus-flavored carbonated drink with a bold taste.",
+    "ingredients": ["Carbonated water", "Sugar", "Citrus flavor", "Caffeine"],
+    "nutrition": {"calories": 170, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/mountain-dew.jpg"
+  },
+  {
+    "id": "27",
+    "name": "Pepsi",
+    "price": 4.50,
+    "description": "Carbonated cola drink with a smooth, sweet flavor.",
+    "ingredients": ["Carbonated water", "Sugar", "Caffeine", "Flavorings"],
+    "nutrition": {"calories": 150, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/pepsi.jpg"
+  },
+  {
+    "id": "28",
+    "name": "Sunkist",
+    "price": 4.50,
+    "description": "Orange-flavored carbonated drink with a tangy twist.",
+    "ingredients": ["Carbonated water", "Sugar", "Orange flavor", "Citric acid"],
+    "nutrition": {"calories": 140, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/sunkist.jpg"
+  },
+  {
+    "id": "29",
+    "name": "Solo",
+    "price": 4.50,
+    "description": "Lemon-flavored carbonated drink with a sharp, refreshing taste.",
+    "ingredients": ["Carbonated water", "Sugar", "Lemon flavor", "Citric acid"],
+    "nutrition": {"calories": 140, "fat": 0, "protein": 0},
+    "category": "Drinks",
+    "image": "https://example.com/solo.jpg"
+  },
+  {
+    "id": "30",
+    "name": "Sauce mild",
+    "price": 2.00,
+    "description": "A mild dipping sauce made with tomatoes and mild spices, perfect for momos and snacks.",
+    "ingredients": ["Tomato", "Water", "Mild spices", "Vinegar"],
+    "nutrition": {"calories": 20, "fat": 0, "protein": 0},
+    "category": "Condiments",
+    "image": "https://example.com/sauce-mild.jpg"
+  },
+  {
+    "id": "31",
+    "name": "Sauce spice",
+    "price": 2.00,
+    "description": "A spicy dipping sauce crafted with chili peppers and Nepali spices, ideal for adding heat to dishes.",
+    "ingredients": ["Chili", "Tomato", "Garlic", "Spices", "Vinegar"],
+    "nutrition": {"calories": 25, "fat": 0, "protein": 0},
+    "category": "Condiments",
+    "image": "https://example.com/sauce-spice.jpg"
+  },
+  {
+    "id": "32",
+    "name": "Nepali Achar sadeko",
+    "price": 5.99,
+    "description": "A traditional Nepali pickled vegetable side dish, spiced with chili and turmeric for a tangy flavor.",
+    "ingredients": ["Mixed vegetables", "Chili", "Turmeric", "Oil", "Spices"],
+    "nutrition": {"calories": 80, "fat": 4, "protein": 2},
+    "category": "Side Dish",
+    "image": "https://example.com/nepali-achar-sadeko.jpg"
+  }
+]
