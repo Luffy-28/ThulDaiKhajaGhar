@@ -59,8 +59,8 @@ app.post('/api/create-payment-intent', async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(total * 100),
       currency: 'aud',
-      payment_method_types: ['card'],   // <-- Ensures card info is returned
-      setup_future_usage: 'off_session', // <-- Allows retrieving card details later
+      payment_method_types: ['card'],   
+      setup_future_usage: 'off_session', 
       metadata: {
         subtotal: subtotal.toFixed(2),
         total: total.toFixed(2),

@@ -5,15 +5,7 @@ import { db } from '../firebase/config';
 import { toast } from 'react-toastify';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faCartPlus } from '@fortawesome/free-solid-svg-icons';
-
-interface MenuItem {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-  image: string;
-}
+import type { MenuItem } from '../firebase/types';
 
 const MenuDetails: React.FC = () => {
   const { id } = useParams();
@@ -73,70 +65,94 @@ const MenuDetails: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="mx-auto max-w-4xl bg-white rounded-xl shadow-lg overflow-hidden">
+    <div className="min-h-screen bg-[#F5F6F5] py-8 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl bg-[#F5F6F5] rounded-xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:shadow-xl border border-[#4682B4]/20 hover:border-[#FF2400]">
         {loading ? (
-          <p className="text-center text-gray-500 p-6">Loading item details...</p>
+          <p className="text-center text-[#4682B4] p-6 text-lg">Loading item details...</p>
         ) : item ? (
           <>
-            {/* Image */}
-            <div className="relative w-full h-64 md:h-96 overflow-hidden">
+            {/* Image and Back Button */}
+            <div className="relative w-full h-64 md:h-96 overflow-hidden bg-[#F5F6F5]">
               <img
                 src={item.image || '/assets/carousel/IMG_1632.jpg'}
                 alt={item.name}
-                className="w-full h-full object-cover transform transition-transform duration-500 hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
               <button
                 onClick={() => navigate(-1)}
-                className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-2 rounded-full hover:bg-opacity-70"
+                className="absolute top-4 left-4 bg-[#FF2400] text-[#F5F6F5] px-4 py-2 rounded-full shadow-md hover:bg-[#FFC107] hover:text-[#0A5C36] hover:shadow-lg transition-all duration-300 flex items-center gap-2"
               >
-                <FontAwesomeIcon icon={faArrowLeft} /> Back
+                <FontAwesomeIcon icon={faArrowLeft} />
+                Back
               </button>
             </div>
 
-            {/* Details */}
-            <div className="p-6">
-              <h1 className="text-3xl font-bold text-teal-700 mb-2">{item.name}</h1>
-              <p className="text-sm uppercase tracking-wide text-teal-700/70 mb-4">
-                {item.category}
-              </p>
-              <p className="text-gray-700 text-base leading-relaxed mb-6">
-                {item.description}
-              </p>
+            {/* Item Details */}
+            <div className="p-6 lg:p-8">
+              <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                <div className="flex-1">
+                  <h1 className="text-4xl font-bold text-[#FF2400] mb-2">{item.name}</h1>
+                  <p className="text-sm uppercase tracking-wide text-[#4682B4] mb-4">
+                    {item.category}
+                  </p>
+                  <p className="text-[#0A5C36] text-base leading-relaxed mb-6">
+                    {item.description}
+                  </p>
 
-              <div className="flex items-center justify-between mb-6">
-                <p className="text-2xl font-bold text-green-700">${item.price.toFixed(2)}</p>
-                <button
-                  onClick={() => addToCart(item)}
-                  className="inline-flex items-center gap-2 rounded-md bg-teal-600 px-4 py-2 text-lg font-semibold text-white hover:bg-teal-700"
-                >
-                  <FontAwesomeIcon icon={faCartPlus} />
-                  Add to Cart
-                </button>
+                  {/* Ingredients */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-[#FF2400] mb-2">Ingredients</h3>
+                    <ul className="list-disc list-inside text-[#0A5C36] space-y-1">
+                      {item.ingredients.map((ing, index) => (
+                        <li key={index}>{ing}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Nutrition */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-[#FF2400] mb-2">Nutrition (Approx.)</h3>
+                    <ul className="list-disc list-inside text-[#0A5C36] space-y-1">
+                      <li>Calories: {item.nutrition.calories} kcal</li>
+                      <li>Fat: {item.nutrition.fat}g</li>
+                      <li>Protein: {item.nutrition.protein}g</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Price and Add to Cart */}
+                <div className="w-full md:w-1/3 bg-[#F5F6F5] p-4 rounded-lg shadow-inner border border-[#4682B4]/20">
+                  <p className="text-3xl font-bold text-[#0A5C36] mb-4">${item.price.toFixed(2)}</p>
+                  <button
+                    onClick={() => addToCart(item)}
+                    className="w-full flex items-center justify-center gap-2 rounded-md bg-[#FF2400] px-6 py-3 text-lg font-semibold text-[#F5F6F5] hover:bg-[#FFC107] hover:text-[#0A5C36] hover:shadow-lg transition-all duration-300"
+                  >
+                    <FontAwesomeIcon icon={faCartPlus} />
+                    Add to Cart
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* ✅ Recommended Items */}
+            {/* Recommended Items */}
             {recommended.length > 0 && (
-              <div className="p-6">
-                <h2 className="text-xl font-semibold text-teal-700 mb-4">
-                  Recommended Items
-                </h2>
-                <div className="flex overflow-x-auto gap-4 pb-3">
+              <div className="p-6 lg:p-8 bg-[#F5F6F5] border-t border-[#4682B4]/20">
+                <h2 className="text-2xl font-semibold text-[#FF2400] mb-4">Recommended Items</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {recommended.map((rec) => (
                     <div
                       key={rec.id}
-                      className="min-w-[200px] bg-gray-100 rounded-lg shadow cursor-pointer hover:shadow-md transition"
+                      className="group bg-[#F5F6F5] rounded-lg shadow-md cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-300 overflow-hidden border border-[#4682B4]/20 hover:border-[#FF2400]"
                       onClick={() => navigate(`/menu/${rec.id}`)}
                     >
                       <img
                         src={rec.image || '/assets/carousel/IMG_1632.jpg'}
                         alt={rec.name}
-                        className="h-32 w-full object-cover rounded-t-lg"
+                        className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-                      <div className="p-3">
-                        <h3 className="text-sm font-semibold">{rec.name}</h3>
-                        <p className="text-xs text-gray-600">${rec.price.toFixed(2)}</p>
+                      <div className="p-4">
+                        <h3 className="text-lg font-semibold text-[#0A5C36]">{rec.name}</h3>
+                        <p className="text-md text-[#0A5C36]">${rec.price.toFixed(2)}</p>
                       </div>
                     </div>
                   ))}
@@ -145,7 +161,7 @@ const MenuDetails: React.FC = () => {
             )}
           </>
         ) : (
-          <p className="text-center text-gray-500 p-6">No item found.</p>
+          <p className="text-center text-[#4682B4] p-6 text-lg">No item found.</p>
         )}
       </div>
     </div>

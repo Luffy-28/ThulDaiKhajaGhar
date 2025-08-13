@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogAction
-} from "../ui/alert-dialog"; // ✅ Adjust path to your AlertDialog component
+} from "../ui/alert-dialog";
 
 interface Order {
   id: string;
@@ -88,7 +88,6 @@ const AdminOrders: React.FC = () => {
     }
   };
 
-  // ✅ Send email with item images
   const sendEmail = async (order: Order, status: string) => {
     try {
       if (!order.email) {
@@ -99,9 +98,9 @@ const AdminOrders: React.FC = () => {
       const itemListHTML = order.items
         .map(
           (item) =>
-            `<li class="item-card">
-              <img src="${item.image}" alt="${item.name}" style="width:60px;height:60px;border-radius:5px;object-fit:cover;margin-right:10px;vertical-align:middle;" />
-              <span style="font-size:14px;">${item.name} × ${item.quantity}</span>
+            `<li style="display:flex;align-items:center;margin-bottom:10px;">
+              <img src="${item.image}" alt="${item.name}" style="width:60px;height:60px;border-radius:5px;object-fit:cover;margin-right:10px;" />
+              <span style="font-size:14px;color:#0A5C36;">${item.name} × ${item.quantity}</span>
             </li>`
         )
         .join('');
@@ -141,28 +140,23 @@ const AdminOrders: React.FC = () => {
 
       const updatedOrder = orders.find((o) => o.id === orderId);
       if (updatedOrder) {
-        // Update UI instantly
         setOrders((prev) =>
           prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
         );
 
-        // If status = Ready, move to previous orders list
         if (newStatus === 'Ready') {
           setOrders((prev) => prev.filter((o) => o.id !== orderId));
           setPreviousOrders((prev) => [...prev, { ...updatedOrder, status: 'Ready' }]);
         }
 
-        // Send in-app notification
         const msg =
           newStatus === 'Preparing'
             ? `Your order #${orderId} is now being prepared.`
             : `Your order #${orderId} is ready for pickup!`;
         await sendNotification(updatedOrder.userId, msg);
 
-        // Send email notification
         await sendEmail(updatedOrder, newStatus);
 
-        // ✅ Show alert dialog
         setAlertMessage(`✅ Order marked as "${newStatus}"`);
         setAlertOpen(true);
       }
@@ -174,27 +168,27 @@ const AdminOrders: React.FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-extrabold text-teal-700 mb-8 text-center">
+    <div className="p-6 bg-[#F5F6F5] min-h-screen transition-all duration-300">
+      <h1 className="text-3xl font-extrabold text-[#FF2400] mb-8 text-center">
         📦 Manage Orders
       </h1>
 
       <div className="flex justify-center gap-4 mb-8">
         <button
-          className={`px-5 py-2 rounded-full text-sm font-medium shadow transition ${
+          className={`px-5 py-2 rounded-full text-sm font-medium shadow transition-all duration-300 ${
             !showPrevious
-              ? 'bg-teal-600 text-white'
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'
+              ? 'bg-[#FF2400] text-[#F5F6F5]'
+              : 'bg-[#F5F6F5] border border-[#4682B4] text-[#0A5C36] hover:bg-[#FFC107] hover:text-[#0A5C36] hover:shadow-md'
           }`}
           onClick={() => setShowPrevious(false)}
         >
           Current Orders
         </button>
         <button
-          className={`px-5 py-2 rounded-full text-sm font-medium shadow transition ${
+          className={`px-5 py-2 rounded-full text-sm font-medium shadow transition-all duration-300 ${
             showPrevious
-              ? 'bg-teal-600 text-white'
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'
+              ? 'bg-[#FF2400] text-[#F5F6F5]'
+              : 'bg-[#F5F6F5] border border-[#4682B4] text-[#0A5C36] hover:bg-[#FFC107] hover:text-[#0A5C36] hover:shadow-md'
           }`}
           onClick={() => setShowPrevious(true)}
         >
@@ -203,28 +197,34 @@ const AdminOrders: React.FC = () => {
       </div>
 
       {loading ? (
-        <p className="text-gray-500 text-center">Loading orders...</p>
+        <p className="text-[#0A5C36] text-center">Loading orders...</p>
       ) : !showPrevious ? (
         orders.length === 0 ? (
-          <p className="text-gray-500 text-center">No current orders found.</p>
+          <p className="text-[#0A5C36] text-center">No current orders found.</p>
         ) : (
           <OrderList orders={orders} updateOrderStatus={updateOrderStatus} />
         )
       ) : previousOrders.length === 0 ? (
-        <p className="text-gray-500 text-center">No previous orders found.</p>
+        <p className="text-[#0A5C36] text-center">No previous orders found.</p>
       ) : (
         <OrderList orders={previousOrders} updateOrderStatus={() => {}} />
       )}
 
-      {/* ✅ AlertDialog */}
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-[#F5F6F5] border-[#4682B4]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Order Status</AlertDialogTitle>
-            <AlertDialogDescription>{alertMessage}</AlertDialogDescription>
+            <AlertDialogTitle className="text-[#FF2400]">Order Status</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#0A5C36]">
+              {alertMessage}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setAlertOpen(false)}>OK</AlertDialogAction>
+            <AlertDialogAction
+              className="bg-[#FF2400] text-[#F5F6F5] hover:bg-[#FFC107] hover:text-[#0A5C36] hover:shadow-lg transition-all duration-300"
+              onClick={() => setAlertOpen(false)}
+            >
+              OK
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -234,7 +234,6 @@ const AdminOrders: React.FC = () => {
 
 export default AdminOrders;
 
-// ✅ Order List Component
 const OrderList = ({
   orders,
   updateOrderStatus,
@@ -246,25 +245,25 @@ const OrderList = ({
     {orders.map((order) => (
       <div
         key={order.id}
-        className="flex flex-col md:flex-row bg-white rounded-xl shadow-md p-4 gap-4"
+        className="flex flex-col md:flex-row bg-[#F5F6F5] rounded-xl shadow-md p-4 gap-4 border border-[#4682B4] hover:border-[#FF2400] hover:scale-[1.02] hover:shadow-xl transition-all duration-300"
       >
         <img
           src={order.items[0]?.image || '/assets/placeholder.jpg'}
           alt={order.items[0]?.name || 'Order'}
-          className="w-full md:w-36 h-36 object-cover rounded-lg border"
+          className="w-full md:w-36 h-36 object-cover rounded-lg border border-[#4682B4] hover:scale-105 transition-all duration-300"
         />
 
         <div className="flex-1 space-y-2">
-          <h3 className="text-xl font-bold text-gray-800">Order #{order.id}</h3>
-          {order.userId && <p><span className="font-medium">UserID:</span> {order.userId}</p>}
-          <p><span className="font-medium">Name:</span> {order.name}</p>
-          <p><span className="font-medium">Phone:</span> {order.phoneNumber}</p>
-          {order.email && <p><span className="font-medium">Email:</span> {order.email}</p>}
-          <p><span className="font-medium">Status:</span> {order.status}</p>
-          <p><span className="font-medium">Total:</span> ${order.total.toFixed(2)}</p>
+          <h3 className="text-xl font-bold text-[#FF2400]">Order #{order.id}</h3>
+          {order.userId && <p><span className="font-medium text-[#0A5C36]">UserID:</span> {order.userId}</p>}
+          <p><span className="font-medium text-[#0A5C36]">Name:</span> {order.name}</p>
+          <p><span className="font-medium text-[#0A5C36]">Phone:</span> {order.phoneNumber}</p>
+          {order.email && <p><span className="font-medium text-[#0A5C36]">Email:</span> {order.email}</p>}
+          <p><span className="font-medium text-[#0A5C36]">Status:</span> {order.status}</p>
+          <p><span className="font-medium text-[#0A5C36]">Total:</span> ${order.total.toFixed(2)}</p>
           <div>
-            <span className="font-medium">Items:</span>
-            <ul className="list-disc ml-6 text-sm text-gray-700">
+            <span className="font-medium text-[#0A5C36]">Items:</span>
+            <ul className="list-disc ml-6 text-sm text-[#0A5C36]">
               {order.items.map((item, i) => (
                 <li key={i}>
                   {item.name} × {item.quantity}
@@ -275,16 +274,16 @@ const OrderList = ({
         </div>
 
         <div className="flex flex-col justify-between items-start md:items-end">
-          <p className="text-sm text-gray-500 mt-2 md:mt-0">
+          <p className="text-sm text-[#4682B4] mt-2 md:mt-0">
             {new Date(order.createdAt).toLocaleString()}
           </p>
           {order.status !== 'Ready' && (
             <button
-              className={`px-4 py-1.5 rounded text-sm text-white mt-4 ${
+              className={`px-4 py-1.5 rounded text-sm text-[#F5F6F5] mt-4 ${
                 order.status === 'Pending'
-                  ? 'bg-yellow-500 hover:bg-yellow-600'
-                  : 'bg-green-600 hover:bg-green-700'
-              }`}
+                  ? 'bg-[#FFC107] hover:bg-[#FF2400]'
+                  : 'bg-[#0A5C36] hover:bg-[#FFC107]'
+              } hover:scale-105 hover:shadow-lg transition-all duration-300`}
               onClick={() => updateOrderStatus(order.id, order.status)}
             >
               {order.status === 'Pending' ? 'Preparing' : 'Ready'}

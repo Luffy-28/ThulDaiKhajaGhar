@@ -4,10 +4,9 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import type { MenuItem } from '../firebase/types';
 import CheckoutForm from './ui/CheckoutForm';
-import { db, auth } from '../firebase/config'; // Adjust path to your Firebase config
+import { db, auth } from '../firebase/config';
 import { doc, getDoc } from 'firebase/firestore';
 
-// Initialize Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
 
 const Checkout: React.FC = () => {
@@ -17,46 +16,38 @@ const Checkout: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [subtotal, setSubtotal] = useState<string | null>(null);
   const [total, setTotal] = useState<string | null>(null);
-  const [savedCards, setSavedCards] = useState<any[]>([]); // Store saved card details
+  const [savedCards, setSavedCards] = useState<any[]>([]);
   const user = auth.currentUser;
-
-  // Extract cartItems from location state
   const cartItems = (state?.cartItems || []) as (MenuItem & { quantity: number })[];
 
   useEffect(() => {
     if (cartItems.length === 0) {
-      navigate('/cart'); // Redirect to cart if no items
+      navigate('/cart');
       return;
     }
 
-    // Fetch client secret and amounts from backend
     const fetchClientSecret = async () => {
       try {
-        console.log('Sending cart items:', cartItems); // Debug cart items
         const res = await fetch('http://localhost:5001/api/create-payment-intent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ products: cartItems }),
         });
 
+        const data = await res.json();
         if (!res.ok) {
-          const errorData = await res.json();
-          console.error('Create PI failed:', res.status, errorData);
-          setError(`Could not start payment: ${errorData.error}${errorData.details ? ` - ${errorData.details}` : ''}`);
+          setError(data.error || 'Failed to create payment intent');
           return;
         }
 
-        const data = await res.json();
         setClientSecret(data.clientSecret);
         setSubtotal(data.subtotal);
         setTotal(data.total);
       } catch (e) {
-        console.error('Fetch error:', e);
-        setError(`Network error starting payment: ${e}`);
+        setError('Network error starting payment');
       }
     };
 
-    // Fetch saved cards
     const fetchSavedCards = async () => {
       if (user) {
         const cardDetailsRef = doc(db, 'users', user.uid, 'cardDetails', 'default');
@@ -86,7 +77,36 @@ const Checkout: React.FC = () => {
       clientSecret
         ? ({
             clientSecret,
-            appearance: { theme: 'stripe' },
+            appearance: {
+              theme: 'stripe',
+              variables: {
+                colorPrimary: '#FF2400', // Saffron Red
+                colorBackground: '#F5F6F5', // Himalayan White
+                colorText: '#0A5C36', // Evergreen
+                colorDanger: '#FF2400', // Saffron Red
+                borderRadius: '0.5rem',
+              },
+              rules: {
+                '.Input': {
+                  borderColor: '#4682B4', // Slate Blue
+                  boxShadow: 'none',
+                },
+                '.Input:hover': {
+                  borderColor: '#FFC107', // Marigold Yellow
+                  boxShadow: '0 0 0 2px rgba(255, 193, 7, 0.2)',
+                },
+                '.Button': {
+                  backgroundColor: '#FF2400', // Saffron Red
+                  color: '#F5F6F5', // Himalayan White
+                  border: 'none',
+                },
+                '.Button:hover': {
+                  backgroundColor: '#FFC107', // Marigold Yellow
+                  color: '#0A5C36', // Evergreen
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                },
+              },
+            },
             loader: 'auto',
           } as const)
         : undefined,
@@ -94,59 +114,69 @@ const Checkout: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="mx-auto max-w-5xl bg-white shadow rounded-xl p-6">
-        <h1 className="text-2xl md:text-3xl font-extrabold text-teal-700 mb-6">Checkout</h1>
+    <div className="min-h-screen bg-[#F5F6F5] py-10 px-6">
+      <div className="mx-auto max-w-5xl bg-[#F5F6F5] shadow-lg rounded-2xl p-6 border border-[#4682B4]/20">
+        <h1 className="text-3xl font-extrabold text-[#FF2400] mb-8">Checkout</h1>
+
         {error ? (
-          <p className="text-red-600">{error}</p>
+          <p className="text-[#FF2400]">{error}</p>
         ) : !clientSecret ? (
-          <p className="text-gray-600">Loading payment details...</p>
+          <p className="text-[#4682B4]">Loading payment details...</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* 🧾 Order Summary */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Order Summary</h2>
+              <h2 className="text-lg font-semibold text-[#0A5C36] mb-4">Order Summary</h2>
               <div className="space-y-4">
                 {cartItems.map((item, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-4 border rounded-lg p-4 bg-gray-50"
+                    className="group flex items-center gap-4 border rounded-lg p-4 bg-[#F5F6F5] hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border-[#4682B4]/20 hover:border-[#FF2400]"
                   >
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-20 h-20 object-cover rounded-md"
+                      className="w-20 h-20 object-cover rounded-md border border-[#4682B4]/40 group-hover:scale-105 transition-all duration-300"
                     />
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-800">{item.name}</p>
-                      <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                      <p className="text-sm font-medium text-green-700">
+                      <p className="font-semibold text-[#0A5C36]">{item.name}</p>
+                      <p className="text-sm text-[#0A5C36]">Qty: {item.quantity}</p>
+                      <p className="text-sm font-medium text-[#0A5C36]">
                         ${(item.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
                   </div>
                 ))}
-                <div className="mt-6 border-t pt-4">
-                  <div className="flex justify-between text-gray-700">
+                <div className="mt-6 border-t border-[#4682B4]/20 pt-4">
+                  <div className="flex justify-between text-[#0A5C36]">
                     <span>Subtotal</span>
                     <span>${subtotal}</span>
                   </div>
-                  <div className="flex justify-between font-bold text-gray-800 mt-2">
+                  <div className="flex justify-between font-bold text-[#0A5C36] mt-2">
                     <span>Total</span>
-                    <span>${total}</span>
+                    <span className="text-[#FF2400]">${total}</span>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* 💳 Payment Section */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Payment Details</h2>
+              <h2 className="text-lg font-semibold text-[#0A5C36] mb-4">Payment Details</h2>
+
               {savedCards.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-md font-medium text-gray-700 mb-2">Saved Cards</h3>
+                  <h3 className="text-md font-medium text-[#0A5C36] mb-2">Saved Cards</h3>
                   {savedCards.map((card, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 border rounded-md mb-2">
-                      <span>Card ending in {card.paymentMethodId.slice(-4)}</span>
+                    <div
+                      key={index}
+                      className="flex items-center justify-between border rounded-md p-3 bg-[#F5F6F5] border-[#4682B4]/20"
+                    >
+                      <span className="text-[#0A5C36] text-sm">
+                        💳 Card ending in {card.paymentMethodId.slice(-4)}
+                      </span>
                       <button
-                        className="px-2 py-1 bg-teal-600 text-white rounded-md text-sm hover:bg-teal-700"
+                        className="px-3 py-1 rounded-full bg-[#FF2400] text-[#F5F6F5] text-sm hover:bg-[#FFC107] hover:text-[#0A5C36] hover:shadow-md transition-all duration-300"
                         onClick={() => console.log('Use card:', card.paymentMethodId)}
                       >
                         Use
@@ -155,6 +185,7 @@ const Checkout: React.FC = () => {
                   ))}
                 </div>
               )}
+
               <Elements stripe={stripePromise} options={elementsOptions}>
                 <CheckoutForm onPaid={handlePaid} cartItems={cartItems} />
               </Elements>

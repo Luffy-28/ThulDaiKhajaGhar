@@ -1,209 +1,352 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { useKeenSlider } from 'keen-slider/react';
+import 'keen-slider/keen-slider.min.css';
 import { toast } from "react-toastify";
-import type { MenuItem } from "../firebase/types";
-import image1 from "../assets/carousel/IMG_1632.jpg";
-import image2 from "../assets/carousel/IMG_1631.jpg";
-import image3 from "../assets/carousel/imageWall.jpeg";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../firebase/config";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faWhatsapp, faFacebookMessenger, faInstagram, faTiktok, faFacebook } from "@fortawesome/free-brands-svg-icons";
 
-const carouselImages = [image1, image2, image3];
+import image1 from '../assets/carousel/IMG_1632.jpg';
+import image2 from '../assets/carousel/IMG_1631.jpg';
+import image3 from '../assets/carousel/imageWall.jpeg';
 
-const menuItems: MenuItem[] = [
-  { id: "1", name: "Margherita Pizza", price: 12.99, description: "Classic pizza with tomato and mozzarella", category: "pizza" },
-  { id: "2", name: "Caesar Salad", price: 8.99, description: "Fresh romaine with Caesar dressing", category: "salad" },
-  { id: "3", name: "Pasta Alfredo", price: 14.99, description: "Creamy Alfredo sauce with fettuccine", category: "pasta" },
+const carouselItems = [
+  { image: image1, title: 'Welcome to Thul Dai Khaja Ghar', description: 'A traditional Nepali dining experience in every bite.' },
+  { image: image2, title: 'Authentic Nepali Flavors', description: 'Savor momos, thalis, and heritage dishes crafted with love.' },
+  { image: image3, title: 'Feel at Home', description: 'Hospitality and warmth inspired by Nepali tradition.' },
 ];
+
+const scrollToNext = () => {
+  const nextSection = document.querySelector('.our-story');
+  nextSection?.scrollIntoView({ behavior: 'smooth' });
+};
 
 const HomePage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const [cart, setCart] = useState<MenuItem[]>([]);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const navigate = useNavigate();
+  const [isManual, setIsManual] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", reason: "", datetime: "", message: "" });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>({
+    loop: true,
+    slides: { perView: 1 },
+    dragSpeed: 1.5,
+    rubberband: false,
+    renderMode: 'performance',
+    mode: 'snap',
+    slideChanged(slider) {
+      setCurrentSlide(slider.track.details.rel);
+      setIsManual(false);
+    },
+    created() {
+      setCurrentSlide(0);
+    },
+    dragStarted() {
+      setIsManual(true);
+    },
+    breakpoints: {
+      '(max-width: 640px)': {
+        dragSpeed: 2,
+      },
+    },
+  });
 
   useEffect(() => {
-    if (!isHovered && carouselImages.length > 1) {
-      intervalRef.current = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
+    if (!isHovered && !isManual && instanceRef.current) {
+      timerRef.current = setInterval(() => {
+        instanceRef.current?.next();
       }, 3000);
     }
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isHovered, carouselImages.length]);
+    return () => clearInterval(timerRef.current!);
+  }, [isHovered, isManual, instanceRef]);
 
-  const goToSlide = (index: number) => {
-    setCurrentSlide((index + carouselImages.length) % carouselImages.length);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const addToCart = (item: MenuItem) => {
-    setCart((c) => [...c, item]);
-    toast.success(`${item.name} added to cart!`);
-  };
-
-  const proceedToCheckout = () => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-    navigate("/checkout"); // change to '/order' if that's your flow
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess(false);
+    try {
+      await addDoc(collection(db, "inquiries"), {
+        ...formData,
+        createdAt: new Date(),
+        status: "pending",
+      });
+      setFormData({ name: "", email: "", phone: "", reason: "", datetime: "", message: "" });
+      setLoading(false);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    } catch (error) {
+      console.error("Error submitting inquiry:", error);
+      toast.error("Failed to submit inquiry. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="mx-auto max-w-7xl px-4 pt-10 text-center">
-        <h1 className="text-3xl md:text-5xl font-extrabold text-teal-700">
-          Thul Dai Khaja Ghar
-        </h1>
-        <p className="mt-4 text-gray-700 max-w-3xl mx-auto">
-          Experience the finest Indian and Nepali cuisine with bold flavors, rich heritage, and heartfelt service.
-        </p>
-      </header>
-
+    <div className="snap-y snap-mandatory h-screen overflow-y-scroll scroll-smooth">
       {/* Carousel */}
       <section
-        className="relative mx-auto mt-8 max-w-6xl px-4"
+        className="snap-start h-screen relative"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="relative h-64 sm:h-80 md:h-[28rem] overflow-hidden rounded-2xl shadow-lg">
-          {/* Slides stacked; we fade/scale the active one */}
-          {carouselImages.map((img, index) => (
-            <div
-              key={index}
-              className={`absolute inset-0 transition-opacity duration-700 ease-out ${
-                currentSlide === index ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              <img
-                src={img}
-                alt={`Slide ${index + 1}`}
-                className={`h-full w-full object-cover transition-transform duration-700 ${
-                  currentSlide === index ? "scale-100" : "scale-105"
-                }`}
-              />
+        <div ref={sliderRef} className="keen-slider h-full">
+          {carouselItems.map((item, index) => (
+            <div key={index} className="keen-slider__slide relative h-screen w-full">
+              <motion.div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${item.image})` }}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+              >
+                <div className="bg-black/50 w-full h-full flex flex-col justify-center items-center text-[#F5F6F5] px-6 text-center">
+                  <motion.h1
+                    className="text-3xl sm:text-4xl md:text-6xl font-bold text-[#FF2400]"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, duration: 0.6 }}
+                  >
+                    {item.title}
+                  </motion.h1>
+                  <motion.p
+                    className="mt-4 text-lg sm:text-xl md:text-2xl font-light text-[#F5F6F5] max-w-xl"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.6 }}
+                  >
+                    {item.description}
+                  </motion.p>
+                </div>
+              </motion.div>
             </div>
           ))}
         </div>
 
         {/* Dots */}
-        <div className="mt-4 flex items-center justify-center gap-2">
-          {carouselImages.map((_, i) => {
-            const active = currentSlide === i;
-            return (
-              <button
-                key={i}
-                onClick={() => goToSlide(i)}
-                aria-label={`Go to slide ${i + 1}`}
-                className={`h-2.5 w-2.5 rounded-full transition ${
-                  active ? "bg-teal-600 w-6" : "bg-gray-300 hover:bg-gray-400"
-                }`}
-              />
-            );
-          })}
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+          {carouselItems.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                instanceRef.current?.moveToIdx(i);
+                setIsManual(true);
+              }}
+              className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
+                currentSlide === i ? 'bg-[#F5F6F5] w-5' : 'bg-[#F5F6F5]/50 hover:bg-[#F5F6F5]/80'
+              }`}
+            />
+          ))}
         </div>
 
-        {/* Arrows */}
+        {/* Arrow Buttons */}
         <button
-          className="absolute left-6 top-1/2 -translate-y-1/2 hidden sm:flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow hover:bg-white transition"
-          onClick={() => goToSlide(currentSlide - 1)}
-          aria-label="Previous slide"
+          className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 h-12 w-12 items-center justify-center rounded-full bg-[#F5F6F5]/70 text-[#0A5C36] text-2xl font-bold shadow hover:bg-[#FFC107] hover:text-[#0A5C36] hover:shadow-lg transition-all duration-300"
+          onClick={() => {
+            instanceRef.current?.prev();
+            setIsManual(true);
+          }}
         >
           ‹
         </button>
         <button
-          className="absolute right-6 top-1/2 -translate-y-1/2 hidden sm:flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow hover:bg-white transition"
-          onClick={() => goToSlide(currentSlide + 1)}
-          aria-label="Next slide"
+          className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 h-12 w-12 items-center justify-center rounded-full bg-[#F5F6F5]/70 text-[#0A5C36] text-2xl font-bold shadow hover:bg-[#FFC107] hover:text-[#0A5C36] hover:shadow-lg transition-all duration-300"
+          onClick={() => {
+            instanceRef.current?.next();
+            setIsManual(true);
+          }}
         >
           ›
         </button>
+
+        {/* Scroll Down Arrow */}
+        <div
+          onClick={scrollToNext}
+          className="absolute bottom-6 left-1/2 transform -translate-x-1/2 cursor-pointer hover:scale-125 hover:text-[#FFC107] transition-all duration-300"
+        >
+          <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+            <svg
+              className="w-6 h-6 text-[#F5F6F5]"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path d="M19 9l-7 7-7-7" />
+            </svg>
+          </motion.div>
+        </div>
       </section>
 
-      {/* Popular Items */}
-      <section className="mx-auto max-w-7xl px-4 py-10">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-         Popular Items
-        </h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {menuItems.map((item) => (
-            <div
-              key={item.id}
-              className="group bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden flex flex-col"
-            >
-              <img
-                src={carouselImages[0]} // replace with actual item images if available
-                alt={item.name}
-                className="h-44 w-full object-cover"
-              />
-              <div className="p-5 flex-1 flex flex-col">
-                <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  {item.description}
-                </p>
-                <div className="mt-4 flex items-center justify-between">
-                  <p className="text-lg font-bold text-green-700">${item.price.toFixed(2)}</p>
-                  <button
-                    onClick={() => addToCart(item)}
-                    className="rounded-md bg-teal-600 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-700"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+      {/* Our Story */}
+      <motion.section
+        className="snap-start h-screen flex items-center justify-center bg-[#F5F6F5] px-6 our-story"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
+        <div className="max-w-3xl text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#FF2400] mb-6">Our Story</h2>
+          <p className="text-base sm:text-lg text-[#0A5C36] leading-relaxed">
+            Welcome to <strong>Thul Dai Khaja Ghar</strong>, a celebration of Nepali heritage, flavors, and heartfelt hospitality.
+            Rooted in the bustling culture of Kathmandu, our recipes have been passed down through generations, preserving the authentic taste of our homeland.
+            Every momo, thali, and sip of chiya tells a story — a story of mountain villages, vibrant markets, and families gathered around the table.
+            Our mission is to bring that same warmth and authenticity to the heart of Sydney, offering a place where friends and families can come together,
+            share a meal, and create memories that last.
+          </p>
         </div>
+      </motion.section>
 
-        {/* Cart Preview */}
-        {cart.length > 0 && (
-          <div className="mt-8 max-w-2xl rounded-xl bg-white p-5 shadow mx-auto">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Cart</h3>
-            <div className="divide-y">
-              {cart.map((item, index) => (
-                <div key={`${item.id}-${index}`} className="flex items-center justify-between py-2 text-sm">
-                  <span className="text-gray-800">{item.name}</span>
-                  <span className="text-gray-700">${item.price.toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-3 flex items-center justify-between font-semibold">
-              <span>Total</span>
-              <span className="text-teal-700">
-                ${cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
-              </span>
-            </div>
-            <div className="mt-4 flex justify-end">
+      {/* About Owner */}
+      <motion.section
+        className="snap-start h-screen flex items-center justify-center bg-[#F5F6F5] px-6"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
+        <div className="max-w-3xl text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#FF2400] mb-6">About the Owner</h2>
+          <p className="text-base sm:text-lg text-[#0A5C36] leading-relaxed">
+            The mind behind <strong>Thul Dai Khaja Ghar</strong> is a seasoned entrepreneur from Nepal with decades of
+            experience in transport, logistics, and hospitality. Known for his dedication, vision, and people-first approach,
+            he’s now channeling his lifelong passion for food and community into this venture — creating a space that feels like home,
+            serving food that feeds both heart and soul.
+          </p>
+        </div>
+      </motion.section>
+
+      {/* Footer */}
+       <motion.footer
+          className="snap-start bg-[#F5F6F5] text-[#0A5C36] px-4 sm:px-6 py-6 flex flex-col gap-6"
+         >
+            {/* Contact Info & Map */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Contact Info */}
+        <section className="rounded-xl bg-[#F5F6F5] p-4 shadow border border-[#4682B4]/20">
+          <h2 className="text-xl font-bold text-[#FF2400] mb-4">Contact Information</h2>
+          <p>📞 0451 995 722</p>
+          <p>📧 thuldaikhajaghar@gmail.com</p>
+          <p>📍 212-214 Parramatta Road, Auburn 2144, NSW</p>
+          <h3 className="mt-4 text-lg font-semibold text-[#FF2400]">Opening Hours</h3>
+          <p>🕐 Mon – Sun: 5:00 PM – 5:00 AM</p>
+        </section>
+
+        {/* Map */}
+        <section className="rounded-xl overflow-hidden shadow border border-[#4682B4]/20">
+          <iframe
+            title="Google Map"
+            src="https://www.google.com/maps?q=212-214+Parramatta+Road,+Auburn+2144,+NSW&output=embed"
+            className="w-full h-64 md:h-full"
+            allowFullScreen
+            loading="lazy"
+          ></iframe>
+        </section>
+      </div>
+
+      {/* Form */}
+      <section className="bg-[#F5F6F5] p-4 rounded-xl shadow border border-[#4682B4]/20">
+        <h2 className="text-xl font-bold text-[#FF2400] mb-4">Reservation / Inquiry Form</h2>
+
+        {success ? (
+          // ✅ Success Animation
+          <motion.div
+            className="flex flex-col items-center justify-center py-4 relative"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+          >
+            {[...Array(5)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-3 h-3 rounded-full bg-white"
+                initial={{ x: 0, y: 0, opacity: 0.6, scale: 1 }}
+                animate={{
+                  x: 200 - i * 25,
+                  y: -200 + i * 20,
+                  opacity: 0,
+                  scale: 0.2,
+                }}
+                transition={{ duration: 1.2, delay: i * 0.05, ease: "easeOut" }}
+              />
+            ))}
+            <motion.svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-12 h-12 text-blue-500 relative z-10"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              initial={{ x: 0, y: 0, opacity: 1, rotate: 0 }}
+              animate={{ x: 200, y: -200, opacity: 0, rotate: 20 }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10l18-7-7 18-2-6-6-2z" />
+            </motion.svg>
+            <p className="mt-2 text-green-600 font-semibold">Your inquiry has been sent!</p>
+          </motion.div>
+        ) : (
+          // ✅ Form
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required
+              className="w-full rounded-md border border-[#4682B4] px-3 py-2" />
+            <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required
+              className="w-full rounded-md border border-[#4682B4] px-3 py-2" />
+            <input name="phone" type="tel" placeholder="Phone Number" value={formData.phone} onChange={handleChange} required
+              className="w-full rounded-md border border-[#4682B4] px-3 py-2" />
+            <select name="reason" value={formData.reason} onChange={handleChange} required
+              className="w-full rounded-md border border-[#4682B4] px-3 py-2 bg-[#F5F6F5]">
+              <option value="">Select Reason</option>
+              <option value="Table Booking">Table Booking</option>
+              <option value="Catering Inquiry">Catering Inquiry</option>
+              <option value="Feedback">Feedback</option>
+            </select>
+            <input name="datetime" type="datetime-local" value={formData.datetime} onChange={handleChange}
+              className="w-full rounded-md border border-[#4682B4] px-3 py-2" />
+            <textarea name="message" placeholder="Optional Message" value={formData.message} onChange={handleChange} rows={2}
+              className="w-full sm:col-span-2 rounded-md border border-[#4682B4] px-3 py-2"></textarea>
+            <div className="sm:col-span-2 flex justify-end">
               <button
-                onClick={proceedToCheckout}
-                className="rounded-md bg-teal-600 px-4 py-2 text-white font-semibold hover:bg-teal-700"
+                type="submit"
+                disabled={loading}
+                className={`inline-flex items-center justify-center rounded-md px-5 py-2 font-bold transition-all duration-300 ${
+                  loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#FF2400] hover:bg-[#FFC107] hover:text-[#0A5C36]'
+                } text-[#F5F6F5]`}
               >
-                Proceed to Checkout
+                {loading ? (
+                  <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                  </svg>
+                ) : '📩 SUBMIT FORM'}
               </button>
             </div>
-          </div>
+          </form>
         )}
       </section>
 
-      {/* Owner Section */}
-      <section className="mx-auto max-w-5xl px-4 pb-10">
-        <div className="rounded-2xl bg-white p-6 shadow">
-          <h2 className="text-xl font-bold text-red-500">About the Owner</h2>
-          <p className="mt-3 text-gray-700 leading-relaxed">
-            <strong>Lok Raj Kandel</strong> is a seasoned businessman from Nepal with a deep passion for food and hospitality.
-            He brings authentic Nepali and Indian flavors to Australia with warmth and pride.
-            <br /><br />
-            Thul Dai Khaja Ghar was born from his dream of offering a welcoming, flavorful escape rooted in culture, tradition,
-            and community.
-          </p>
-        </div>
-      </section>
+      {/* Social Icons */}
+      <div className="flex justify-center flex-wrap gap-4">
+        <a href="https://www.facebook.com/profile.php?id=61568657361565" target="_blank" rel="noopener noreferrer"
+          className="h-12 w-12 flex items-center justify-center rounded-full bg-[#FF2400] text-[#F5F6F5]">
+          <FontAwesomeIcon icon={faFacebook} size="lg" />
+        </a>
+        <a href="https://www.tiktok.com/@thul_dai_khaja_ghar?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer"
+          className="h-12 w-12 flex items-center justify-center rounded-full bg-[#FF2400] text-[#F5F6F5]">
+          <FontAwesomeIcon icon={faTiktok} size="lg" />
+        </a>
+      </div>
+    </motion.footer>
 
-      {/* Footer */}
-      <footer className="bg-white border-t">
-        <div className="mx-auto max-w-7xl px-4 py-6 text-center text-gray-700">
-          🍽️ Dine with us or order online to enjoy Thul Dai Khaja Ghar's delights from the comfort of your home.
-        </div>
-      </footer>
     </div>
   );
 };

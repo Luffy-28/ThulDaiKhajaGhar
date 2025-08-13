@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+"use client";
+
+import React, { useEffect, useState } from "react";
 import {
   collection,
   addDoc,
@@ -6,29 +8,88 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-} from 'firebase/firestore';
+} from "firebase/firestore";
 import {
   ref,
   uploadBytes,
   getDownloadURL,
   deleteObject,
-} from 'firebase/storage';
-import { db, storage } from '../../firebase/config';
-import type { MenuItem } from '../../firebase/types';
+} from "firebase/storage";
+import { db, storage } from "../../firebase/config";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUpload } from "@fortawesome/free-solid-svg-icons";
+import type { MenuItem } from "../../firebase/types";
+
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "../ui/alert-dialog"; // adjust path
+
+const fallbackImage = "/fallback.jpg";
 
 const AdminItemPanel: React.FC = () => {
   const [items, setItems] = useState<MenuItem[]>([]);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState<number>(0);
-  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState<string[]>([]);
+
+  // Form states
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState<number | "">("");
+  const [category, setCategory] = useState("");
+  const [ingredients, setIngredients] = useState("");
+  const [calories, setCalories] = useState<number | "">("");
+  const [fat, setFat] = useState<number | "">("");
+  const [protein, setProtein] = useState<number | "">("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
+  // Alert dialog states
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+
+  // Delete confirmation states
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
+
+  // Cancel edit confirmation states
+  const [cancelOpen, setCancelOpen] = useState(false);
+
+  // Search state
+  const [searchTerm, setSearchTerm] = useState("");
+
   const fetchItems = async () => {
-    const snap = await getDocs(collection(db, 'MenuItem'));
-    const data = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as MenuItem[];
+    const snap = await getDocs(collection(db, "MenuItem"));
+    const data = snap.docs.map((d) => {
+      const docData = d.data() as Partial<MenuItem>;
+      return {
+        id: d.id,
+        name: docData.name || "",
+        price: docData.price || 0,
+        description: docData.description || "",
+        category: docData.category || "",
+        ingredients: Array.isArray(docData.ingredients)
+          ? docData.ingredients
+          : [],
+        nutrition: docData.nutrition || {
+          calories: 0,
+          fat: 0,
+          protein: 0,
+        },
+        image: docData.image || "",
+      } as MenuItem;
+    });
     setItems(data);
+    setCategories(
+      Array.from(new Set(data.map((item) => item.category).filter(Boolean)))
+    );
   };
 
   useEffect(() => {
@@ -41,26 +102,37 @@ const AdminItemPanel: React.FC = () => {
     return await getDownloadURL(storageRef);
   };
 
+  const showAlert = (title: string, message: string) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOpen(true);
+  };
+
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      let imageUrl = '';
+      let imageUrl = "";
       if (imageFile) {
         imageUrl = await uploadImage(imageFile);
       }
-      await addDoc(collection(db, 'MenuItem'), {
+      await addDoc(collection(db, "MenuItem"), {
         name,
         description,
-        price: Number(price),
+        price: Number(price) || 0,
         category,
+        ingredients: ingredients.split(",").map((i) => i.trim()),
+        nutrition: {
+          calories: Number(calories) || 0,
+          fat: Number(fat) || 0,
+          protein: Number(protein) || 0,
+        },
         image: imageUrl,
       });
-      alert('✅ Item added!');
+      showAlert("Success", "Item added successfully!");
       resetForm();
       fetchItems();
-    } catch (err) {
-      console.error(err);
-      alert('❌ Failed to add item.');
+    } catch {
+      showAlert("Error", "Failed to add item.");
     }
   };
 
@@ -72,38 +144,42 @@ const AdminItemPanel: React.FC = () => {
       if (imageFile) {
         imageUrl = await uploadImage(imageFile);
       }
-      await updateDoc(doc(db, 'MenuItem', editingItem.id), {
+      await updateDoc(doc(db, "MenuItem", editingItem.id), {
         name,
         description,
-        price: Number(price),
+        price: Number(price) || 0,
         category,
+        ingredients: ingredients.split(",").map((i) => i.trim()),
+        nutrition: {
+          calories: Number(calories) || 0,
+          fat: Number(fat) || 0,
+          protein: Number(protein) || 0,
+        },
         image: imageUrl,
       });
-      alert('✅ Item updated!');
+      showAlert("Success", "Item updated successfully!");
       resetForm();
       fetchItems();
-    } catch (err) {
-      console.error(err);
-      alert('❌ Failed to update item.');
+    } catch {
+      showAlert("Error", "Failed to update item.");
     }
   };
 
-  const handleDeleteItem = async (item: MenuItem) => {
-    if (window.confirm(`Delete "${item.name}"?`)) {
-      try {
-        await deleteDoc(doc(db, 'MenuItem', item.id));
-        if (item.image) {
-          const imageRef = ref(storage, item.image);
-          deleteObject(imageRef).catch(() => {
-            console.warn('⚠️ Could not delete image from storage.');
-          });
-        }
-        alert('✅ Item deleted!');
-        fetchItems();
-      } catch (err) {
-        console.error(err);
-        alert('❌ Failed to delete item.');
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteDoc(doc(db, "MenuItem", itemToDelete.id));
+      if (itemToDelete.image) {
+        const imageRef = ref(storage, itemToDelete.image);
+        deleteObject(imageRef).catch(() => {});
       }
+      showAlert("Success", "Item deleted successfully!");
+      fetchItems();
+    } catch {
+      showAlert("Error", "Failed to delete item.");
+    } finally {
+      setConfirmOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -113,74 +189,236 @@ const AdminItemPanel: React.FC = () => {
     setDescription(item.description);
     setPrice(item.price);
     setCategory(item.category);
+    setIngredients(item.ingredients.join(", "));
+    setCalories(item.nutrition.calories);
+    setFat(item.nutrition.fat);
+    setProtein(item.nutrition.protein);
+    setPreviewImage(item.image);
     setImageFile(null);
   };
 
   const resetForm = () => {
     setEditingItem(null);
-    setName('');
-    setDescription('');
-    setPrice(0);
-    setCategory('');
+    setName("");
+    setDescription("");
+    setPrice("");
+    setCategory("");
+    setIngredients("");
+    setCalories("");
+    setFat("");
+    setProtein("");
     setImageFile(null);
+    setPreviewImage(null);
   };
 
-  return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-teal-700 mb-6 text-center">🍴 Manage Menu Items</h1>
+  const handleImageChange = (file: File | null) => {
+    setImageFile(file);
+    if (file) {
+      setPreviewImage(URL.createObjectURL(file));
+    } else {
+      setPreviewImage(null);
+    }
+  };
 
+  const filteredItems = items.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="p-6 bg-[#F5F6F5] min-h-screen">
+      {/* Alert Dialog */}
+      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{alertTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{alertMessage}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setAlertOpen(false)}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete{" "}
+              <strong>{itemToDelete?.name}</strong>? This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Cancel Edit Confirmation */}
+      <AlertDialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Editing</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel editing this item? Unsaved changes
+              will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setCancelOpen(false)}>
+              Continue Editing
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setCancelOpen(false);
+                resetForm();
+              }}
+            >
+              Yes, Cancel
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Form */}
       <form
         onSubmit={editingItem ? handleUpdateItem : handleAddItem}
-        className="max-w-2xl mx-auto bg-white p-6 rounded shadow-md space-y-4"
+        className="max-w-2xl mx-auto bg-white p-6 rounded shadow-md space-y-4 border border-[#4682B4]"
       >
         <input
           type="text"
           placeholder="Item name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded"
+          className="w-full p-2 border border-[#4682B4] rounded"
           required
         />
         <textarea
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded"
+          className="w-full p-2 border border-[#4682B4] rounded"
           required
         />
         <input
           type="number"
           placeholder="Price"
           value={price}
-          onChange={(e) => setPrice(Number(e.target.value))}
-          className="w-full p-2 border border-gray-300 rounded"
+          onChange={(e) =>
+            setPrice(e.target.value === "" ? "" : Number(e.target.value))
+          }
+          className="w-full p-2 border border-[#4682B4] rounded"
           required
         />
+
+        {/* Category field (no numbers) */}
         <input
           type="text"
+          list="categoryList"
           placeholder="Category"
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded"
+          onChange={(e) => {
+            const value = e.target.value;
+            if (!/\d/.test(value)) {
+              setCategory(value);
+            }
+          }}
+          className="w-full p-2 border border-[#4682B4] rounded"
           required
         />
+        <datalist id="categoryList">
+          {categories.map((cat, idx) => (
+            <option key={idx} value={cat} />
+          ))}
+        </datalist>
+
         <input
-          type="file"
-          onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-          className="w-full"
+          type="text"
+          placeholder="Ingredients (comma-separated)"
+          value={ingredients}
+          onChange={(e) => setIngredients(e.target.value)}
+          className="w-full p-2 border border-[#4682B4] rounded"
         />
+
+        <div className="grid grid-cols-3 gap-3">
+          <input
+            type="number"
+            placeholder="Calories"
+            value={calories}
+            onChange={(e) =>
+              setCalories(e.target.value === "" ? "" : Number(e.target.value))
+            }
+            className="p-2 border border-[#4682B4] rounded"
+          />
+          <input
+            type="number"
+            placeholder="Fat (g)"
+            value={fat}
+            onChange={(e) =>
+              setFat(e.target.value === "" ? "" : Number(e.target.value))
+            }
+            className="p-2 border border-[#4682B4] rounded"
+          />
+          <input
+            type="number"
+            placeholder="Protein (g)"
+            value={protein}
+            onChange={(e) =>
+              setProtein(e.target.value === "" ? "" : Number(e.target.value))
+            }
+            className="p-2 border border-[#4682B4] rounded"
+          />
+        </div>
+
+        {/* Image Upload */}
+        <div
+          className="flex flex-col items-center border-2 border-dashed border-[#4682B4] p-4 rounded cursor-pointer hover:border-[#FF2400] transition"
+          onClick={() => document.getElementById("fileInput")?.click()}
+        >
+          <FontAwesomeIcon
+            icon={faUpload}
+            className="text-[#4682B4] text-3xl mb-2"
+          />
+          <p className="text-sm text-gray-600">Click to upload image</p>
+          <input
+            id="fileInput"
+            type="file"
+            className="hidden"
+            accept="image/*"
+            onChange={(e) => handleImageChange(e.target.files?.[0] || null)}
+          />
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="mt-3 h-32 w-32 object-cover rounded shadow"
+            />
+          )}
+        </div>
+
         <div className="flex gap-3">
           <button
             type="submit"
-            className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
+            className="bg-[#FF2400] text-white px-4 py-2 rounded hover:bg-[#FFC107] hover:text-[#0A5C36] transition"
           >
-            {editingItem ? 'Update Item' : 'Add Item'}
+            {editingItem ? "Update Item" : "Add Item"}
           </button>
           {editingItem && (
             <button
               type="button"
-              className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-              onClick={resetForm}
+              onClick={() => setCancelOpen(true)}
+              className="bg-[#4682B4] text-white px-4 py-2 rounded hover:bg-[#FFC107] transition"
             >
               Cancel
             </button>
@@ -188,33 +426,67 @@ const AdminItemPanel: React.FC = () => {
         </div>
       </form>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-        {items.map((item) => (
+      {/* Items list with search */}
+      <h2 className="text-2xl font-semibold text-[#FF2400] mt-10 mb-4">
+        Current Menu Items
+      </h2>
+
+      {/* Search Bar */}
+      <input
+        type="text"
+        placeholder="Search menu items..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="w-full md:w-1/2 p-2 mb-6 border border-[#4682B4] rounded"
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        {filteredItems.map((item) => (
           <div
             key={item.id}
-            className="bg-white shadow rounded overflow-hidden flex flex-col"
+            className="bg-white shadow rounded overflow-hidden flex flex-col border border-[#4682B4] hover:border-[#FF2400] transition"
           >
             <img
-              src={item.image}
+              src={item.image || fallbackImage}
               alt={item.name}
+              onError={(e) => {
+                e.currentTarget.src = fallbackImage;
+              }}
               className="h-48 w-full object-cover"
             />
             <div className="p-4 space-y-1 flex-1">
-              <h3 className="text-lg font-bold text-gray-800">{item.name}</h3>
-              <p className="text-sm text-gray-600">{item.description}</p>
-              <p className="font-medium text-green-700">${item.price.toFixed(2)}</p>
-              <p className="text-sm text-gray-500">Category: {item.category}</p>
+              <h3 className="text-lg font-bold text-[#FF2400]">{item.name}</h3>
+              <p className="text-sm">{item.description}</p>
+              <p className="font-medium">${item.price.toFixed(2)}</p>
+              <p className="text-sm text-[#4682B4]">
+                Category: {item.category}
+              </p>
+              <p className="text-sm">
+                Ingredients:{" "}
+                {Array.isArray(item.ingredients)
+                  ? item.ingredients.join(", ")
+                  : "N/A"}
+              </p>
+              <p className="text-sm">
+                Nutrition:{" "}
+                {item.nutrition
+                  ? `${item.nutrition.calories} cal, ${item.nutrition.fat}g fat, ${item.nutrition.protein}g protein`
+                  : "N/A"}
+              </p>
             </div>
-            <div className="flex justify-end gap-2 p-4 border-t">
+            <div className="flex justify-end gap-2 p-4 border-t border-[#4682B4]">
               <button
                 onClick={() => startEdit(item)}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
+                className="bg-[#FFC107] px-3 py-1 rounded text-sm hover:bg-[#FF2400] hover:text-white transition"
               >
                 Edit
               </button>
               <button
-                onClick={() => handleDeleteItem(item)}
-                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                onClick={() => {
+                  setItemToDelete(item);
+                  setConfirmOpen(true);
+                }}
+                className="bg-[#FF2400] text-white px-3 py-1 rounded text-sm hover:bg-[#0A5C36] transition"
               >
                 Delete
               </button>

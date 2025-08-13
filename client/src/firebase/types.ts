@@ -3,8 +3,20 @@ export interface MenuItem {
   name: string;
   price: number;
   description: string;
+  ingredients: string[];
+  nutrition: { calories: number; fat: number; protein: number };
   category: string;
-  image?: string;
+  image: string;
+}
+export interface Inquiry {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  reason: string;
+  datetime: string;
+  message: string;
+  createdAt?: any;
 }
 
 export interface orders {

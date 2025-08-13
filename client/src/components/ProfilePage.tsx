@@ -6,20 +6,21 @@ import {
   updatePassword,
   reauthenticateWithCredential,
   EmailAuthProvider,
+  type User,
 } from "firebase/auth";
 import {
   collection,
   doc,
   getDoc,
-  getDocs,
   onSnapshot,
   query,
   orderBy,
   updateDoc,
   where,
+  type DocumentData,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useUserTheme } from "../hooks/useUserTheme";
+import { toast } from "react-toastify";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -36,12 +37,14 @@ interface OrderItem {
   image?: string;
   quantity: number;
 }
+
 interface Order {
   id: string;
   items: OrderItem[];
   total: number;
   status: string;
 }
+
 interface NotificationData {
   id: string;
   itemName: string;
@@ -50,99 +53,144 @@ interface NotificationData {
 }
 
 export default function ProfilePage() {
-  const [tab, setTab] = useState<"details" | "orders" | "track" | "theme" | "notifications">("details");
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-  const [userPhone, setUserPhone] = useState("");
+  const [tab, setTab] = useState<"details" | "orders" | "track" | "notifications">("details");
+  const [userName, setUserName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
+  const [userPhone, setUserPhone] = useState<string>("");
   const [photoURL, setPhotoURL] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
-  const [loadingNotif, setLoadingNotif] = useState(true);
-
-  // password change states
-  const [currentPass, setCurrentPass] = useState("");
-  const [newPass, setNewPass] = useState("");
-
-  const [showChangeModal, setShowChangeModal] = useState(false);
-  const [showPermissionDialog, setShowPermissionDialog] = useState(false);
-  const [hasPermission, setHasPermission] = useState(false);
+  const [loadingNotif, setLoadingNotif] = useState<boolean>(true);
+  const [currentPass, setCurrentPass] = useState<string>("");
+  const [newPass, setNewPass] = useState<string>("");
+  const [showChangeModal, setShowChangeModal] = useState<boolean>(false);
+  const [showPermissionDialog, setShowPermissionDialog] = useState<boolean>(false);
+  const [hasPermission, setHasPermission] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { saveTheme } = useUserTheme();
 
   useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      setUserEmail(user.email || "");
-      setPhotoURL(user.photoURL || null);
+    const user: User | null = auth.currentUser;
+    if (!user) return;
 
-      const perm = localStorage.getItem("photoPermission");
-      if (perm === "true") setHasPermission(true);
+    setUserEmail(user.email || "");
+    setPhotoURL(user.photoURL || null);
 
-      getDoc(doc(db, "users", user.uid)).then((snap) => {
-        if (snap.exists()) {
-          const data = snap.data() as any;
-          setUserName(data.name || "");
-          setUserPhone(data.phoneNumber || "");
-          if (data.photoURL) setPhotoURL(data.photoURL);
-        }
-      });
+    const perm = localStorage.getItem("photoPermission");
+    if (perm === "true") setHasPermission(true);
 
-      const qOrders = query(collection(db, "orders"), where("userId", "==", user.uid));
-      getDocs(qOrders).then((snap) => {
-        const fetched: Order[] = [];
-        snap.forEach((d) => {
+    // Load profile doc
+    getDoc(doc(db, "users", user.uid)).then((snap) => {
+      if (snap.exists()) {
+        const data = snap.data() as DocumentData;
+        setUserName(data.name || "");
+        setUserPhone(data.phoneNumber || "");
+        if (data.photoURL) setPhotoURL(data.photoURL);
+      }
+    });
+
+    // ========= ORDERS (realtime) =========
+    // Your saved structure uses: userDetails.uid, paymentStatus, total as string (toFixed)
+    // Path assumed: collection("orders")
+    const ordersRef = collection(db, "orders");
+    const ordersQ = query(ordersRef, where("userDetails.uid", "==", user.uid));
+    const unsubOrders = onSnapshot(
+      ordersQ,
+      (snap) => {
+        const fetched: Order[] = snap.docs.map((d) => {
           const data = d.data() as any;
-          fetched.push({
+          // Map items safely
+          const items: OrderItem[] = Array.isArray(data.items)
+            ? data.items.map((it: any) => ({
+                name: String(it?.name ?? ""),
+                image: it?.image ? String(it.image) : undefined,
+                quantity: Number(it?.quantity ?? 0),
+              }))
+            : [];
+
+          // total saved as string via toFixed(2) -> parseFloat
+          const total =
+            typeof data.total === "number"
+              ? data.total
+              : parseFloat(String(data.total ?? "0"));
+
+          // status comes from paymentStatus in your payload
+          const status = String(data.paymentStatus ?? data.status ?? "Pending");
+
+          return {
             id: d.id,
-            items: data.items || [],
-            total: data.total || 0,
-            status: data.status || "Pending",
-          });
+            items,
+            total: isNaN(total) ? 0 : total,
+            status,
+          };
         });
-        setOrders(fetched);
-      });
 
-      const notifRef = collection(db, "users", user.uid, "notifications");
-      const notifQuery = query(notifRef, orderBy("timestamp", "desc"));
-      const unsub = onSnapshot(notifQuery, (snap) => {
-        const msgs: NotificationData[] = [];
-        snap.forEach((d) => {
-          const data = d.data() as any;
-          msgs.push({
+        // Optional: newest first (by createdAt ISO string if present)
+        fetched.sort((a, b) => {
+          const aCreated = snap.docs.find((x) => x.id === a.id)?.data()?.createdAt ?? "";
+          const bCreated = snap.docs.find((x) => x.id === b.id)?.data()?.createdAt ?? "";
+          return String(bCreated).localeCompare(String(aCreated));
+        });
+
+        console.debug("[orders] fetched:", fetched);
+        setOrders(fetched);
+      },
+      (err) => {
+        console.error("[orders] onSnapshot error:", err);
+        toast.error("Failed to load orders.");
+      }
+    );
+
+    // ========= NOTIFICATIONS (realtime) =========
+    const notifRef = collection(db, "users", user.uid, "notifications");
+    const notifQ = query(notifRef, orderBy("timestamp", "desc"));
+    const unsubNotif = onSnapshot(
+      notifQ,
+      (snap) => {
+        const msgs: NotificationData[] = snap.docs.map((d) => {
+          const data = d.data();
+          return {
             id: d.id,
             itemName: data.itemName || "",
             itemImage: data.itemImage || "",
             message: data.message || "",
-          });
+          };
         });
         setNotifications(msgs);
         setLoadingNotif(false);
-      });
-      return () => unsub();
-    }
+      },
+      (err) => {
+        console.error("[notifications] onSnapshot error:", err);
+        setLoadingNotif(false);
+      }
+    );
+
+    return () => {
+      unsubOrders();
+      unsubNotif();
+    };
   }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = async (): Promise<void> => {
     await signOut(auth);
+    toast.success("Logged out successfully!");
     window.location.href = "/";
   };
 
-  const handleUpdateDetails = async (e: React.FormEvent) => {
+  const handleUpdateDetails = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    const user = auth.currentUser;
+    const user: User | null = auth.currentUser;
     if (!user) return;
     await updateDoc(doc(db, "users", user.uid), {
       name: userName,
       phoneNumber: userPhone,
     });
     await updateProfile(user, { displayName: userName });
-    alert("✅ Details updated!");
+    toast.success("✅ Details updated!");
   };
 
-  // Change password
-  const handleChangePassword = async () => {
-    const user = auth.currentUser;
+  const handleChangePassword = async (): Promise<void> => {
+    const user: User | null = auth.currentUser;
     if (!user || !user.email) return alert("⚠️ User not found.");
     if (!currentPass || !newPass) return alert("⚠️ Please fill in both fields.");
 
@@ -150,15 +198,15 @@ export default function ProfilePage() {
       const cred = EmailAuthProvider.credential(user.email, currentPass);
       await reauthenticateWithCredential(user, cred);
       await updatePassword(user, newPass);
-      alert("✅ Password updated successfully!");
+      toast.success("✅ Password updated successfully!");
       setCurrentPass("");
       setNewPass("");
     } catch (err: any) {
-      alert("❌ " + err.message);
+      toast.error(`❌ ${err.message}`);
     }
   };
 
-  const handleAvatarClick = () => {
+  const handleAvatarClick = (): void => {
     if (!hasPermission) {
       setShowPermissionDialog(true);
     } else {
@@ -166,15 +214,15 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAllowPermission = () => {
+  const handleAllowPermission = (): void => {
     localStorage.setItem("photoPermission", "true");
     setHasPermission(true);
     setShowPermissionDialog(false);
     fileInputRef.current?.click();
   };
 
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const user = auth.currentUser;
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const user: User | null = auth.currentUser;
     if (!user) return;
     const file = e.target.files?.[0];
     if (!file) return;
@@ -184,36 +232,37 @@ export default function ProfilePage() {
     await updateDoc(doc(db, "users", user.uid), { photoURL: url });
     await updateProfile(user, { photoURL: url });
     setPhotoURL(url);
-    alert("✅ Profile image updated!");
+    toast.success("✅ Profile image updated!");
     setShowChangeModal(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-[#F5F6F5] py-8 px-4">
       <div className="mx-auto max-w-6xl">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-teal-700 mb-6">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-[#FF2400] mb-6">
           My Profile
         </h1>
 
         {/* Tabs */}
         <div className="flex flex-wrap items-center gap-2 mb-6">
-          {(["details", "orders", "track", "theme", "notifications"] as const).map((t) => (
+          {(["details", "orders", "track", "notifications"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition ${
-                tab === t ? "bg-teal-600 text-white border-teal-600" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-300 ${
+                tab === t
+                  ? 'bg-[#FF2400] text-[#F5F6F5] border-[#FF2400]'
+                  : 'bg-[#F5F6F5] text-[#0A5C36] border-[#4682B4] hover:bg-[#FFC107] hover:text-[#0A5C36]'
               }`}
             >
               {t === "details" && "User Details"}
               {t === "orders" && "Past Orders"}
               {t === "track" && "Track Order"}
-              {t === "theme" && "Themes"}
               {t === "notifications" && "Notifications"}
             </button>
           ))}
           <button
-            className="ml-auto rounded-full bg-red-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-600"
+            className="ml-auto rounded-full bg-[#FF2400] px-3 py-1.5 text-sm font-semibold text-[#F5F6F5] hover:bg-[#FFC107] hover:text-[#0A5C36] hover:scale-105 hover:shadow-md transition-all duration-300"
             onClick={handleLogout}
           >
             Logout
@@ -224,16 +273,16 @@ export default function ProfilePage() {
         {tab === "details" && (
           <form
             onSubmit={handleUpdateDetails}
-            className="rounded-xl bg-white p-6 shadow space-y-4"
+            className="rounded-xl bg-[#F5F6F5] p-6 shadow border border-[#4682B4]/20 space-y-4"
           >
-            <h2 className="text-xl font-bold text-gray-900">Your Details</h2>
+            <h2 className="text-xl font-bold text-[#FF2400]">Your Details</h2>
 
             <div className="flex items-center gap-4">
               <div className="relative">
                 <img
                   src={photoURL || "/default-avatar.png"}
                   alt="Profile"
-                  className="h-20 w-20 rounded-full object-cover ring-2 ring-teal-600 cursor-pointer"
+                  className="h-20 w-20 rounded-full object-cover ring-2 ring-[#FF2400] cursor-pointer hover:ring-[#FFC107] hover:scale-105 transition-all duration-300"
                   onClick={handleAvatarClick}
                 />
               </div>
@@ -248,47 +297,47 @@ export default function ProfilePage() {
             </div>
 
             <label className="block">
-              <span className="text-sm font-medium text-gray-700">Name</span>
+              <span className="text-sm font-medium text-[#0A5C36]">Name</span>
               <input
                 type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                className="mt-1 w-full rounded-md border border-[#4682B4] px-3 py-2 text-[#0A5C36] focus:border-[#FFC107] focus:ring-[#FFC107] hover:border-[#FFC107] hover:shadow-md focus:outline-none transition-all duration-300"
               />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium text-gray-700">Email</span>
+              <span className="text-sm font-medium text-[#0A5C36]">Email</span>
               <input
                 type="email"
                 value={userEmail}
                 disabled
-                className="mt-1 w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-gray-600"
+                className="mt-1 w-full rounded-md border border-[#4682B4]/20 bg-[#F5F6F5]/50 px-3 py-2 text-[#4682B4]"
               />
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium text-gray-700">Phone</span>
+              <span className="text-sm font-medium text-[#0A5C36]">Phone</span>
               <input
                 type="tel"
                 value={userPhone}
                 onChange={(e) => setUserPhone(e.target.value)}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                className="mt-1 w-full rounded-md border border-[#4682B4] px-3 py-2 text-[#0A5C36] focus:border-[#FFC107] focus:ring-[#FFC107] hover:border-[#FFC107] hover:shadow-md focus:outline-none transition-all duration-300"
               />
             </label>
 
             <div className="flex items-center justify-end">
               <button
                 type="submit"
-                className="rounded-md bg-teal-600 px-4 py-2 text-white font-semibold hover:bg-teal-700"
+                className="rounded-md bg-[#FF2400] px-4 py-2 text-[#F5F6F5] font-semibold hover:bg-[#FFC107] hover:text-[#0A5C36] hover:scale-105 hover:shadow-md transition-all duration-300"
               >
                 Update Details
               </button>
             </div>
 
             {/* Change Password */}
-            <div className="pt-4 border-t">
-              <h3 className="text-base font-semibold text-gray-900 mb-2">
+            <div className="pt-4 border-t border-[#4682B4]/20">
+              <h3 className="text-base font-semibold text-[#FF2400] mb-2">
                 Change Password
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -297,20 +346,20 @@ export default function ProfilePage() {
                   placeholder="Current Password"
                   value={currentPass}
                   onChange={(e) => setCurrentPass(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                  className="w-full rounded-md border border-[#4682B4] px-3 py-2 text-[#0A5C36] placeholder-[#4682B4] focus:border-[#FFC107] focus:ring-[#FFC107] hover:border-[#FFC107] hover:shadow-md focus:outline-none transition-all duration-300"
                 />
                 <input
                   type="password"
                   placeholder="New Password"
                   value={newPass}
                   onChange={(e) => setNewPass(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                  className="w-full rounded-md border border-[#4682B4] px-3 py-2 text-[#0A5C36] placeholder-[#4682B4] focus:border-[#FFC107] focus:ring-[#FFC107] hover:border-[#FFC107] hover:shadow-md focus:outline-none transition-all duration-300"
                 />
               </div>
               <div className="mt-3 flex justify-end">
                 <button
                   type="button"
-                  className="rounded-md bg-teal-600 px-4 py-2 text-white font-semibold hover:bg-teal-700"
+                  className="rounded-md bg-[#FF2400] px-4 py-2 text-[#F5F6F5] font-semibold hover:bg-[#FFC107] hover:text-[#0A5C36] hover:scale-105 hover:shadow-md transition-all duration-300"
                   onClick={handleChangePassword}
                 >
                   Change Password
@@ -323,22 +372,22 @@ export default function ProfilePage() {
         {/* Modal for changing photo */}
         {showChangeModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">Profile Photo</h3>
+            <div className="w-full max-w-md rounded-xl bg-[#F5F6F5] p-6 shadow-xl border border-[#4682B4]/20">
+              <h3 className="text-lg font-bold text-[#FF2400] mb-3">Profile Photo</h3>
               <img
                 src={photoURL || "/default-avatar.png"}
                 alt="Profile"
-                className="h-24 w-24 rounded-full object-cover ring-2 ring-teal-600 mx-auto mb-4"
+                className="h-24 w-24 rounded-full object-cover ring-2 ring-[#FF2400] mx-auto mb-4 hover:ring-[#FFC107] hover:scale-105 transition-all duration-300"
               />
               <div className="flex justify-end gap-3">
                 <button
-                  className="rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  className="rounded-md border border-[#4682B4] px-4 py-2 text-[#0A5C36] hover:bg-[#FFC107] hover:text-[#0A5C36] hover:shadow-md transition-all duration-300"
                   onClick={() => setShowChangeModal(false)}
                 >
                   Close
                 </button>
                 <button
-                  className="rounded-md bg-teal-600 px-4 py-2 text-white hover:bg-teal-700"
+                  className="rounded-md bg-[#FF2400] px-4 py-2 text-[#F5F6F5] hover:bg-[#FFC107] hover:text-[#0A5C36] hover:scale-105 hover:shadow-md transition-all duration-300"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   Change Image
@@ -353,16 +402,24 @@ export default function ProfilePage() {
           <AlertDialog open={showPermissionDialog} onOpenChange={setShowPermissionDialog}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Allow Photo Upload?</AlertDialogTitle>
-                <AlertDialogDescription>
+                <AlertDialogTitle className="text-[#FF2400]">Allow Photo Upload?</AlertDialogTitle>
+                <AlertDialogDescription className="text-[#0A5C36]">
                   We need your permission to upload and store your profile photo.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setShowPermissionDialog(false)}>
+                <AlertDialogCancel
+                  className="border-[#4682B4] text-[#0A5C36] hover:bg-[#FFC107] hover:text-[#0A5C36] hover:shadow-md transition-all duration-300"
+                  onClick={() => setShowPermissionDialog(false)}
+                >
                   Cancel
                 </AlertDialogCancel>
-                <AlertDialogAction onClick={handleAllowPermission}>Allow</AlertDialogAction>
+                <AlertDialogAction
+                  className="bg-[#FF2400] text-[#F5F6F5] hover:bg-[#FFC107] hover:text-[#0A5C36] hover:scale-105 hover:shadow-md transition-all duration-300"
+                  onClick={handleAllowPermission}
+                >
+                  Allow
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -370,15 +427,15 @@ export default function ProfilePage() {
 
         {/* ORDERS */}
         {tab === "orders" && (
-          <div className="rounded-xl bg-white p-6 shadow">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Past Orders</h2>
+          <div className="rounded-xl bg-[#F5F6F5] p-6 shadow border border-[#4682B4]/20">
+            <h2 className="text-xl font-bold text-[#FF2400] mb-4">Past Orders</h2>
             {orders.length === 0 ? (
-              <p className="text-gray-600">No orders found.</p>
+              <p className="text-[#4682B4]">No orders found.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b bg-gray-50 text-gray-700">
+                    <tr className="border-b bg-[#F5F6F5] text-[#0A5C36]">
                       <th className="px-3 py-2">Image</th>
                       <th className="px-3 py-2">Order ID</th>
                       <th className="px-3 py-2">Total</th>
@@ -387,7 +444,7 @@ export default function ProfilePage() {
                   </thead>
                   <tbody>
                     {orders.map((o) => (
-                      <tr key={o.id} className="border-b last:border-0">
+                      <tr key={o.id} className="border-b last:border-0 border-[#4682B4]/20 hover:bg-[#FFC107]/10 transition-all duration-300">
                         <td className="px-3 py-2">
                           {o.items[0]?.image ? (
                             <img
@@ -399,9 +456,9 @@ export default function ProfilePage() {
                             "—"
                           )}
                         </td>
-                        <td className="px-3 py-2">{o.id}</td>
-                        <td className="px-3 py-2">${o.total.toFixed(2)}</td>
-                        <td className="px-3 py-2">{o.status}</td>
+                        <td className="px-3 py-2 text-[#0A5C36]">{o.id}</td>
+                        <td className="px-3 py-2 text-[#0A5C36]">${o.total.toFixed(2)}</td>
+                        <td className="px-3 py-2 text-[#0A5C36]">{o.status}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -413,15 +470,15 @@ export default function ProfilePage() {
 
         {/* TRACK */}
         {tab === "track" && (
-          <div className="rounded-xl bg-white p-6 shadow">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Track Orders</h2>
+          <div className="rounded-xl bg-[#F5F6F5] p-6 shadow border border-[#4682B4]/20">
+            <h2 className="text-xl font-bold text-[#FF2400] mb-4">Track Orders</h2>
             {orders.length === 0 ? (
-              <p className="text-gray-600">No active orders.</p>
+              <p className="text-[#4682B4]">No active orders.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b bg-gray-50 text-gray-700">
+                    <tr className="border-b bg-[#F5F6F5] text-[#0A5C36]">
                       <th className="px-3 py-2">Image</th>
                       <th className="px-3 py-2">Order ID</th>
                       <th className="px-3 py-2">Status</th>
@@ -429,7 +486,7 @@ export default function ProfilePage() {
                   </thead>
                   <tbody>
                     {orders.map((o) => (
-                      <tr key={o.id} className="border-b last:border-0">
+                      <tr key={o.id} className="border-b last:border-0 border-[#4682B4]/20 hover:bg-[#FFC107]/10 transition-all duration-300">
                         <td className="px-3 py-2">
                           {o.items[0]?.image ? (
                             <img
@@ -441,8 +498,8 @@ export default function ProfilePage() {
                             "—"
                           )}
                         </td>
-                        <td className="px-3 py-2">{o.id}</td>
-                        <td className="px-3 py-2">{o.status}</td>
+                        <td className="px-3 py-2 text-[#0A5C36]">{o.id}</td>
+                        <td className="px-3 py-2 text-[#0A5C36]">{o.status}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -451,43 +508,20 @@ export default function ProfilePage() {
             )}
           </div>
         )}
-
-        {/* THEMES */}
-        {tab === "theme" && (
-          <div className="rounded-xl bg-white p-6 shadow">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Select Theme</h2>
-            <div className="flex flex-wrap gap-3">
-              {[
-                { name: "System", value: "system" },
-                { name: "Light", value: "light" },
-                { name: "Dark", value: "dark" },
-              ].map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => saveTheme(opt.value as any)}
-                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                >
-                  {opt.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* NOTIFICATIONS */}
         {tab === "notifications" && (
-          <div className="rounded-xl bg-white p-6 shadow">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Notifications</h2>
+          <div className="rounded-xl bg-[#F5F6F5] p-6 shadow border border-[#4682B4]/20">
+            <h2 className="text-xl font-bold text-[#FF2400] mb-4">Notifications</h2>
             {loadingNotif ? (
-              <p className="text-gray-600">Loading...</p>
+              <p className="text-[#4682B4]">Loading...</p>
             ) : notifications.length === 0 ? (
-              <p className="text-gray-600">No notifications yet.</p>
+              <p className="text-[#4682B4]">No notifications yet.</p>
             ) : (
               <ul className="space-y-3">
                 {notifications.map((n) => (
                   <li
                     key={n.id}
-                    className="flex items-center gap-3 rounded-lg border border-gray-200 p-3"
+                    className="flex items-center gap-3 rounded-lg border border-[#4682B4]/20 p-3 hover:border-[#FF2400] hover:shadow-md transition-all duration-300"
                   >
                     {n.itemImage ? (
                       <img
@@ -496,11 +530,11 @@ export default function ProfilePage() {
                         className="h-10 w-10 rounded object-cover"
                       />
                     ) : (
-                      <div className="h-10 w-10 rounded bg-gray-200" />
+                      <div className="h-10 w-10 rounded bg-[#F5F6F5]" />
                     )}
                     <div>
-                      <strong className="block text-gray-900">{n.itemName}</strong>
-                      <p className="text-sm text-gray-700">{n.message}</p>
+                      <strong className="block text-[#0A5C36]">{n.itemName}</strong>
+                      <p className="text-sm text-[#0A5C36]">{n.message}</p>
                     </div>
                   </li>
                 ))}

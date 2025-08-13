@@ -229,3 +229,19 @@ button {
 .fade-in {
   animation-fill-mode: forwards;
 }
+
+.Toastify__toast--success {
+  background-color: #0A5C36 !important; /* Evergreen */
+  color: #F5F6F5 !important; /* Himalayan White */
+}
+.Toastify__toast--error {
+  background-color: #FF2400 !important; /* Saffron Red */
+  color: #F5F6F5 !important;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

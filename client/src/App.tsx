@@ -11,15 +11,15 @@ import AdminItemPanel from "./components/admin/AdminPanel";
 import AdminAnalysis from "./components/admin/AdminAnalysis";
 import ProfilePage from "./components/ProfilePage";
 import AdminManageUsers from "./components/admin/AdminManageUsers";
-import { useUserTheme } from "./hooks/useUserTheme";
 import CheckoutForm from "./components/Checkout";
 import Done from "./components/Done";
 import MenuDetails from "./components/MenuDetials";
+import { ToastContainer } from "react-toastify";
+import AdminInquire from "./components/admin/AdminInquiry";
 
 export default function AppRouter() {
-   useUserTheme();
   return (
-    
+    <div >
     <Router>
       <Routes>
         {/* 👇 Default redirect to home (instead of forcing login) */}
@@ -45,9 +45,12 @@ export default function AppRouter() {
           <Route path="/admin/panel" element={<AdminItemPanel />} />
           <Route path="/admin/analysis" element={<AdminAnalysis />} />
           <Route path="/admin/profile" element={<AdminManageUsers />} />
+          <Route path="/admin/inquiries" element={<AdminInquire />} />
 
         </Route>
       </Routes>
     </Router>
+    <ToastContainer position="top-right" autoClose={3000} />
+    </div>
   );
 }
