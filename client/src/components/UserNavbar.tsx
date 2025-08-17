@@ -235,7 +235,7 @@ export default function UserNavbar() {
           >
             Cart
           </NavLink>
-          <NavLink
+          {/* <NavLink
             to="/contact"
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
@@ -245,7 +245,7 @@ export default function UserNavbar() {
             }
           >
             Contact
-          </NavLink>
+          </NavLink> */}
           <NavLink
             to="/profile"
             onClick={() => setOpen(false)}

@@ -1,0 +1,146 @@
+[debug] [2025-08-14T04:05:12.377Z] ----------------------------------------------------------------------
+[debug] [2025-08-14T04:05:12.379Z] Command:       /opt/homebrew/Cellar/node/24.1.0/bin/node /opt/homebrew/bin/firebase init
+[debug] [2025-08-14T04:05:12.379Z] CLI Version:   14.12.0
+[debug] [2025-08-14T04:05:12.379Z] Platform:      darwin
+[debug] [2025-08-14T04:05:12.379Z] Node Version:  v24.1.0
+[debug] [2025-08-14T04:05:12.379Z] Time:          Thu Aug 14 2025 14:05:12 GMT+1000 (Australian Eastern Standard Time)
+[debug] [2025-08-14T04:05:12.379Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-08-14T04:05:12.380Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-08-14T04:05:12.396Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-08-14T04:05:12.396Z] > authorizing via signed-in user (thakurishankar159@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /Users/shankarsingh/restaurent
+
+[debug] [2025-08-14T04:05:12.878Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-08-14T04:05:12.878Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] but for now we'll just set up a default project.
+[info] 
+[debug] [2025-08-14T04:05:32.632Z] Checked if tokens are valid: false, expires at: 1754061782629
+[debug] [2025-08-14T04:05:32.632Z] Checked if tokens are valid: false, expires at: 1754061782629
+[debug] [2025-08-14T04:05:32.632Z] > refreshing access token with scopes: []
+[debug] [2025-08-14T04:05:32.634Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-08-14T04:05:32.634Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-08-14T04:05:32.905Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-08-14T04:05:32.905Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-08-14T04:05:32.921Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2025-08-14T04:05:33.855Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2025-08-14T04:05:33.855Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  Using project restaurent-5d9ad (Restaurent) 
+[info] 
+=== App Hosting Setup
+[debug] [2025-08-14T04:05:39.775Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:39.775Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:39.776Z] >>> [apiv2][query] GET https://cloudbilling.googleapis.com/v1/projects/restaurent-5d9ad/billingInfo [none]
+[debug] [2025-08-14T04:05:41.430Z] <<< [apiv2][status] GET https://cloudbilling.googleapis.com/v1/projects/restaurent-5d9ad/billingInfo 200
+[debug] [2025-08-14T04:05:41.431Z] <<< [apiv2][body] GET https://cloudbilling.googleapis.com/v1/projects/restaurent-5d9ad/billingInfo {"name":"projects/restaurent-5d9ad/billingInfo","projectId":"restaurent-5d9ad","billingAccountName":"billingAccounts/01658D-D01528-165095","billingEnabled":true}
+[debug] [2025-08-14T04:05:41.432Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:41.432Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:41.433Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-08-14T04:05:41.433Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/restaurent-5d9ad
+[debug] [2025-08-14T04:05:43.274Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-08-14T04:05:43.275Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-08-14T04:05:43.275Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:43.275Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:43.276Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/firebaseapphosting.googleapis.com:enable [none]
+[debug] [2025-08-14T04:05:43.276Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/firebaseapphosting.googleapis.com:enable x-goog-quota-user=projects/restaurent-5d9ad
+[debug] [2025-08-14T04:05:43.825Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/firebaseapphosting.googleapis.com:enable 200
+[debug] [2025-08-14T04:05:43.826Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/firebaseapphosting.googleapis.com:enable [omitted]
+[debug] [2025-08-14T04:05:53.839Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.840Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.840Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.840Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.840Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.840Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.840Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.840Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.841Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.841Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.841Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.842Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:53.842Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/developerconnect.googleapis.com [none]
+[debug] [2025-08-14T04:05:53.842Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/developerconnect.googleapis.com x-goog-quota-user=projects/restaurent-5d9ad
+[debug] [2025-08-14T04:05:53.844Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/cloudbuild.googleapis.com [none]
+[debug] [2025-08-14T04:05:53.844Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/cloudbuild.googleapis.com x-goog-quota-user=projects/restaurent-5d9ad
+[debug] [2025-08-14T04:05:53.845Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/secretmanager.googleapis.com [none]
+[debug] [2025-08-14T04:05:53.845Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/secretmanager.googleapis.com x-goog-quota-user=projects/restaurent-5d9ad
+[debug] [2025-08-14T04:05:53.847Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/run.googleapis.com [none]
+[debug] [2025-08-14T04:05:53.847Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/run.googleapis.com x-goog-quota-user=projects/restaurent-5d9ad
+[debug] [2025-08-14T04:05:53.848Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/artifactregistry.googleapis.com [none]
+[debug] [2025-08-14T04:05:53.848Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/artifactregistry.googleapis.com x-goog-quota-user=projects/restaurent-5d9ad
+[debug] [2025-08-14T04:05:53.849Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/iam.googleapis.com [none]
+[debug] [2025-08-14T04:05:53.849Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/iam.googleapis.com x-goog-quota-user=projects/restaurent-5d9ad
+[debug] [2025-08-14T04:05:55.249Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/run.googleapis.com 200
+[debug] [2025-08-14T04:05:55.249Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/run.googleapis.com [omitted]
+[debug] [2025-08-14T04:05:55.259Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/secretmanager.googleapis.com 200
+[debug] [2025-08-14T04:05:55.259Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/secretmanager.googleapis.com [omitted]
+[debug] [2025-08-14T04:05:55.266Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/cloudbuild.googleapis.com 200
+[debug] [2025-08-14T04:05:55.266Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/cloudbuild.googleapis.com [omitted]
+[debug] [2025-08-14T04:05:55.274Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/iam.googleapis.com 200
+[debug] [2025-08-14T04:05:55.274Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/iam.googleapis.com [omitted]
+[debug] [2025-08-14T04:05:55.281Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/developerconnect.googleapis.com 200
+[debug] [2025-08-14T04:05:55.281Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/developerconnect.googleapis.com [omitted]
+[debug] [2025-08-14T04:05:55.281Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:55.281Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:05:55.281Z] >>> [apiv2][query] POST https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/developerconnect.googleapis.com:enable [none]
+[debug] [2025-08-14T04:05:55.281Z] >>> [apiv2][(partial)header] POST https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/developerconnect.googleapis.com:enable x-goog-quota-user=projects/restaurent-5d9ad
+[debug] [2025-08-14T04:05:55.282Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/artifactregistry.googleapis.com 200
+[debug] [2025-08-14T04:05:55.283Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/artifactregistry.googleapis.com [omitted]
+[debug] [2025-08-14T04:05:55.765Z] <<< [apiv2][status] POST https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/developerconnect.googleapis.com:enable 200
+[debug] [2025-08-14T04:05:55.765Z] <<< [apiv2][body] POST https://serviceusage.googleapis.com/v1/projects/restaurent-5d9ad/services/developerconnect.googleapis.com:enable [omitted]
+[debug] [2025-08-14T04:06:05.780Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:06:05.781Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:06:05.781Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/restaurent-5d9ad/serviceAccounts/firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-08-14T04:06:05.781Z] >>> [apiv2][(partial)header] POST https://iam.googleapis.com/v1/projects/restaurent-5d9ad/serviceAccounts/firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com:testIamPermissions x-goog-quota-user=projects/restaurent-5d9ad
+[debug] [2025-08-14T04:06:05.781Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/restaurent-5d9ad/serviceAccounts/firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-08-14T04:06:07.543Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/restaurent-5d9ad/serviceAccounts/firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com:testIamPermissions 404
+[debug] [2025-08-14T04:06:07.543Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/restaurent-5d9ad/serviceAccounts/firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com:testIamPermissions {"error":{"code":404,"message":"Unknown service account","status":"NOT_FOUND"}}
+[debug] [2025-08-14T04:06:07.545Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:06:07.545Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:06:07.545Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/restaurent-5d9ad/serviceAccounts [none]
+[debug] [2025-08-14T04:06:07.545Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/restaurent-5d9ad/serviceAccounts {"accountId":"firebase-app-hosting-compute","serviceAccount":{"displayName":"Firebase App Hosting compute service account","description":"Default service account used to run builds and deploys for Firebase App Hosting"}}
+[debug] [2025-08-14T04:06:09.099Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/restaurent-5d9ad/serviceAccounts 200
+[debug] [2025-08-14T04:06:09.099Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/restaurent-5d9ad/serviceAccounts [omitted]
+[debug] [2025-08-14T04:06:09.100Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:06:09.100Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:06:09.100Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/restaurent-5d9ad:getIamPolicy [none]
+[debug] [2025-08-14T04:06:10.512Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/restaurent-5d9ad:getIamPolicy 200
+[debug] [2025-08-14T04:06:10.513Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/restaurent-5d9ad:getIamPolicy {"version":1,"etag":"BwY8S2M1zCQ=","bindings":[{"role":"roles/aiplatform.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-aiplatform.iam.gserviceaccount.com"]},{"role":"roles/artifactregistry.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-artifactregistry.iam.gserviceaccount.com"]},{"role":"roles/cloudbuild.builds.builder","members":["serviceAccount:978143899585@cloudbuild.gserviceaccount.com"]},{"role":"roles/cloudbuild.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-cloudbuild.iam.gserviceaccount.com"]},{"role":"roles/cloudfunctions.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/cloudfunctions.serviceAgent","members":["serviceAccount:service-978143899585@gcf-admin-robot.iam.gserviceaccount.com"]},{"role":"roles/compute.serviceAgent","members":["serviceAccount:service-978143899585@compute-system.iam.gserviceaccount.com"]},{"role":"roles/containerregistry.ServiceAgent","members":["serviceAccount:service-978143899585@containerregistry.iam.gserviceaccount.com"]},{"role":"roles/datastore.user","members":["serviceAccount:ext-firestore-stripe-payments@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/editor","members":["serviceAccount:978143899585-compute@developer.gserviceaccount.com","serviceAccount:978143899585@cloudservices.gserviceaccount.com","serviceAccount:restaurent-5d9ad@appspot.gserviceaccount.com"]},{"role":"roles/eventarc.eventReceiver","members":["serviceAccount:978143899585-compute@developer.gserviceaccount.com"]},{"role":"roles/firebase.managementServiceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firebase.iam.gserviceaccount.com"]},{"role":"roles/firebase.sdkAdminServiceAgent","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/firebaseauth.admin","members":["serviceAccount:ext-firestore-stripe-payments@restaurent-5d9ad.iam.gserviceaccount.com","serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/firebasemods.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firebasemods.iam.gserviceaccount.com"]},{"role":"roles/firebaserules.system","members":["serviceAccount:service-978143899585@firebase-rules.iam.gserviceaccount.com"]},{"role":"roles/firebasestorage.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firebasestorage.iam.gserviceaccount.com"]},{"role":"roles/firestore.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firestore.iam.gserviceaccount.com"]},{"role":"roles/iam.serviceAccountTokenCreator","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/owner","members":["user:thakurishankar159@gmail.com"]},{"role":"roles/run.serviceAgent","members":["serviceAccount:service-978143899585@serverless-robot-prod.iam.gserviceaccount.com"]},{"role":"roles/storage.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]}]}
+[debug] [2025-08-14T04:06:10.514Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:06:10.514Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:06:10.514Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/restaurent-5d9ad:setIamPolicy [none]
+[debug] [2025-08-14T04:06:10.514Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/restaurent-5d9ad:setIamPolicy {"policy":{"version":1,"etag":"BwY8S2M1zCQ=","bindings":[{"role":"roles/aiplatform.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-aiplatform.iam.gserviceaccount.com"]},{"role":"roles/artifactregistry.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-artifactregistry.iam.gserviceaccount.com"]},{"role":"roles/cloudbuild.builds.builder","members":["serviceAccount:978143899585@cloudbuild.gserviceaccount.com"]},{"role":"roles/cloudbuild.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-cloudbuild.iam.gserviceaccount.com"]},{"role":"roles/cloudfunctions.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/cloudfunctions.serviceAgent","members":["serviceAccount:service-978143899585@gcf-admin-robot.iam.gserviceaccount.com"]},{"role":"roles/compute.serviceAgent","members":["serviceAccount:service-978143899585@compute-system.iam.gserviceaccount.com"]},{"role":"roles/containerregistry.ServiceAgent","members":["serviceAccount:service-978143899585@containerregistry.iam.gserviceaccount.com"]},{"role":"roles/datastore.user","members":["serviceAccount:ext-firestore-stripe-payments@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/editor","members":["serviceAccount:978143899585-compute@developer.gserviceaccount.com","serviceAccount:978143899585@cloudservices.gserviceaccount.com","serviceAccount:restaurent-5d9ad@appspot.gserviceaccount.com"]},{"role":"roles/eventarc.eventReceiver","members":["serviceAccount:978143899585-compute@developer.gserviceaccount.com"]},{"role":"roles/firebase.managementServiceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firebase.iam.gserviceaccount.com"]},{"role":"roles/firebase.sdkAdminServiceAgent","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com","serviceAccount:firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/firebaseauth.admin","members":["serviceAccount:ext-firestore-stripe-payments@restaurent-5d9ad.iam.gserviceaccount.com","serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/firebasemods.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firebasemods.iam.gserviceaccount.com"]},{"role":"roles/firebaserules.system","members":["serviceAccount:service-978143899585@firebase-rules.iam.gserviceaccount.com"]},{"role":"roles/firebasestorage.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firebasestorage.iam.gserviceaccount.com"]},{"role":"roles/firestore.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firestore.iam.gserviceaccount.com"]},{"role":"roles/iam.serviceAccountTokenCreator","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/owner","members":["user:thakurishankar159@gmail.com"]},{"role":"roles/run.serviceAgent","members":["serviceAccount:service-978143899585@serverless-robot-prod.iam.gserviceaccount.com"]},{"role":"roles/storage.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/firebaseapphosting.computeRunner","members":["serviceAccount:firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/developerconnect.readTokenAccessor","members":["serviceAccount:firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/storage.objectViewer","members":["serviceAccount:firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com"]}]},"updateMask":"bindings"}
+[debug] [2025-08-14T04:06:11.649Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/restaurent-5d9ad:setIamPolicy 200
+[debug] [2025-08-14T04:06:11.649Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/restaurent-5d9ad:setIamPolicy {"version":1,"etag":"BwY8S2TK/is=","bindings":[{"role":"roles/aiplatform.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-aiplatform.iam.gserviceaccount.com"]},{"role":"roles/artifactregistry.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-artifactregistry.iam.gserviceaccount.com"]},{"role":"roles/cloudbuild.builds.builder","members":["serviceAccount:978143899585@cloudbuild.gserviceaccount.com"]},{"role":"roles/cloudbuild.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-cloudbuild.iam.gserviceaccount.com"]},{"role":"roles/cloudfunctions.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/cloudfunctions.serviceAgent","members":["serviceAccount:service-978143899585@gcf-admin-robot.iam.gserviceaccount.com"]},{"role":"roles/compute.serviceAgent","members":["serviceAccount:service-978143899585@compute-system.iam.gserviceaccount.com"]},{"role":"roles/containerregistry.ServiceAgent","members":["serviceAccount:service-978143899585@containerregistry.iam.gserviceaccount.com"]},{"role":"roles/datastore.user","members":["serviceAccount:ext-firestore-stripe-payments@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/developerconnect.readTokenAccessor","members":["serviceAccount:firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/editor","members":["serviceAccount:978143899585-compute@developer.gserviceaccount.com","serviceAccount:978143899585@cloudservices.gserviceaccount.com","serviceAccount:restaurent-5d9ad@appspot.gserviceaccount.com"]},{"role":"roles/eventarc.eventReceiver","members":["serviceAccount:978143899585-compute@developer.gserviceaccount.com"]},{"role":"roles/firebase.managementServiceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firebase.iam.gserviceaccount.com"]},{"role":"roles/firebase.sdkAdminServiceAgent","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com","serviceAccount:firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/firebaseapphosting.computeRunner","members":["serviceAccount:firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/firebaseauth.admin","members":["serviceAccount:ext-firestore-stripe-payments@restaurent-5d9ad.iam.gserviceaccount.com","serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/firebasemods.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firebasemods.iam.gserviceaccount.com"]},{"role":"roles/firebaserules.system","members":["serviceAccount:service-978143899585@firebase-rules.iam.gserviceaccount.com"]},{"role":"roles/firebasestorage.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firebasestorage.iam.gserviceaccount.com"]},{"role":"roles/firestore.serviceAgent","members":["serviceAccount:service-978143899585@gcp-sa-firestore.iam.gserviceaccount.com"]},{"role":"roles/iam.serviceAccountTokenCreator","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/owner","members":["user:thakurishankar159@gmail.com"]},{"role":"roles/run.serviceAgent","members":["serviceAccount:service-978143899585@serverless-robot-prod.iam.gserviceaccount.com"]},{"role":"roles/storage.admin","members":["serviceAccount:firebase-adminsdk-fbsvc@restaurent-5d9ad.iam.gserviceaccount.com"]},{"role":"roles/storage.objectViewer","members":["serviceAccount:firebase-app-hosting-compute@restaurent-5d9ad.iam.gserviceaccount.com"]}]}
+[info] i  This command links your local project to Firebase App Hosting. You will be able to deploy your web app with `firebase deploy` after setup. 
+[debug] [2025-08-14T04:06:29.343Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:06:29.343Z] Checked if tokens are valid: true, expires at: 1755147931906
+[debug] [2025-08-14T04:06:29.343Z] >>> [apiv2][query] GET https://firebaseapphosting.googleapis.com/v1beta/projects/restaurent-5d9ad/locations/-/backends 
+[debug] [2025-08-14T04:06:30.780Z] <<< [apiv2][status] GET https://firebaseapphosting.googleapis.com/v1beta/projects/restaurent-5d9ad/locations/-/backends 200
+[debug] [2025-08-14T04:06:30.780Z] <<< [apiv2][body] GET https://firebaseapphosting.googleapis.com/v1beta/projects/restaurent-5d9ad/locations/-/backends {}
+[debug] [2025-08-14T04:10:40.188Z] ExitPromptError: User force closed the prompt with SIGINT
+    at Interface.sigint (/opt/homebrew/lib/node_modules/firebase-tools/node_modules/@inquirer/core/dist/commonjs/lib/create-prompt.js:101:37)
+    at Interface.emit (node:events:507:28)
+    at Interface.emit (node:domain:489:12)
+    at [_ttyWrite] [as _ttyWrite] (node:internal/readline/interface:1381:18)
+    at ReadStream.onkeypress (node:internal/readline/interface:297:20)
+    at ReadStream.emit (node:events:519:35)
+    at ReadStream.emit (node:domain:489:12)
+    at emitKeys (node:internal/readline/utils:371:14)
+    at emitKeys.next (<anonymous>)
+    at ReadStream.onData (node:internal/readline/emitKeypressEvents:64:36)
+[error] 
+[error] Error: An unexpected error has occurred.
